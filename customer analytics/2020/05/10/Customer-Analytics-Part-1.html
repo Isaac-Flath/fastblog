@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Descriptive Customer Analytics (Part 1) | fastpages</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Descriptive Customer Analytics (Part 1)" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Simple and minimalistic descriptive customer analytics starting point" />
+<meta property="og:description" content="Simple and minimalistic descriptive customer analytics starting point" />
+<link rel="canonical" href="https://isaac-flath.github.io/fastblog/customer%20analytics/2020/05/10/Customer-Analytics-Part-1.html" />
+<meta property="og:url" content="https://isaac-flath.github.io/fastblog/customer%20analytics/2020/05/10/Customer-Analytics-Part-1.html" />
+<meta property="og:site_name" content="fastpages" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-10T00:00:00-05:00" />
+<script type="application/ld+json">
+{"url":"https://isaac-flath.github.io/fastblog/customer%20analytics/2020/05/10/Customer-Analytics-Part-1.html","@type":"BlogPosting","headline":"Descriptive Customer Analytics (Part 1)","dateModified":"2020-05-10T00:00:00-05:00","datePublished":"2020-05-10T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://isaac-flath.github.io/fastblog/customer%20analytics/2020/05/10/Customer-Analytics-Part-1.html"},"description":"Simple and minimalistic descriptive customer analytics starting point","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/fastblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://isaac-flath.github.io/fastblog/feed.xml" title="fastpages" /><link rel="shortcut icon" type="image/x-icon" href="/fastblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/fastblog/">fastpages</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/fastblog/about/">About Me</a><a class="page-link" href="/fastblog/search/">Search</a><a class="page-link" href="/fastblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Descriptive Customer Analytics (Part 1)</h1><p class="page-description">Simple and minimalistic descriptive customer analytics starting point</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-05-10T00:00:00-05:00" itemprop="datePublished">
+        May 10, 2020
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      4 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Customer Analytics">Customer Analytics</a>
+        
+      
+      </p>
+    
+
+    </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#intro">Intro</a></li>
+<li class="toc-entry toc-h1"><a href="#background">Background:</a></li>
+<li class="toc-entry toc-h1"><a href="#determine-length-of-customer-buying-cycle">Determine length of customer buying cycle:</a></li>
+<li class="toc-entry toc-h1"><a href="#calculate-descriptive-customer-metrics">Calculate descriptive customer metrics:</a></li>
+<li class="toc-entry toc-h1"><a href="#conduct-ab-testing">Conduct A/B testing:</a></li>
+<li class="toc-entry toc-h1"><a href="#heres-a-few-ideas-for-ab-tests-using-rfm-to-get-you-started">Here’s a few ideas for A/B tests using RFM to get you started:</a></li>
+</ul><h1 id="intro">
+<a class="anchor" href="#intro" aria-hidden="true"><span class="octicon octicon-link"></span></a>Intro</h1>
+
+<p>Customer Analytics is a valuable tool, but often the basics are overlooked. It can have a huge impact, and it doesn’t always mean complex modeling.  It always starts with the basics.  Because customer analytics can make such a big impact, I am going to break this into several posts.</p>
+
+<p>In this post (Part 1) I am going to explain a basic descriptive customer analytics framework and how use it to identify the current state.  This understanding allows us to conduct A/B testing so we can measure how our actions impact revenue and by how much.  There are many ways to do this, this is just one of them.</p>
+
+<p>In Part 2 I’ll talk about how to build on the descriptive framework to create a predictive model.  A predictive model allows companies to plan proactively instead of reactively.</p>
+
+<h1 id="background">
+<a class="anchor" href="#background" aria-hidden="true"><span class="octicon octicon-link"></span></a>Background:</h1>
+
+<p>Many companies rely on experience and basic summarizing of historical statistics to make decisions.  While both of these are useful tools, a powerful way to successfully sustain long term revenue growth is to add customer analytics to their tool belt.  In this post I am discussing the starting point for analytics, descriptive analytics.</p>
+
+<p>An easy and solid starting point for descriptive analytics is a RFM (Recency, Frequency, Monetary Value) model.  A primary advantage to this is the only data you need is purchase history for each customer, which is information that almost every company tracks.  I’ve outlined the three main steps to creating this framework and using it to increase revenue.</p>
+
+<h1 id="determine-length-of-customer-buying-cycle">
+<a class="anchor" href="#determine-length-of-customer-buying-cycle" aria-hidden="true"><span class="octicon octicon-link"></span></a>Determine length of customer buying cycle:</h1>
+
+<p>The first step is to determine what time range is a good time range to use for a buying cycle.  For a grocery store, maybe we say typically people go grocery shopping once a week.  In that scenario we would use 1 week as our time range for our cycle.  However a company that prints business cards may find a much longer time frame as customers tend to buy 1,000 and repurchase when they get low.  For this example we could use a 6 month cycle.  I encourage people to explore their data and pick a time range based on intuition.  There are better and more complicated ways to figure out this time range, but I encourage people to demonstrate results and revenue growth before circling back with more resources and support from executive management.</p>
+
+<h1 id="calculate-descriptive-customer-metrics">
+<a class="anchor" href="#calculate-descriptive-customer-metrics" aria-hidden="true"><span class="octicon octicon-link"></span></a>Calculate descriptive customer metrics:</h1>
+
+<p>Let’s say we choose a 1 month cycle.  The next step is to create and fill in a table to get frequency and monetary Value.  In the table below I outline how we calculate both of those KPIs (Key Performance Indicators).</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>January</th>
+      <th>February</th>
+      <th>March</th>
+      <th>Frequency</th>
+      <th>Monetary Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Example</td>
+      <td>Rev</td>
+      <td>Rev</td>
+      <td>Rev</td>
+      <td># of slots purchased in</td>
+      <td>Average Monetary Value</td>
+    </tr>
+    <tr>
+      <td>Customer A</td>
+      <td>$102</td>
+      <td>$60</td>
+      <td>$75</td>
+      <td>3</td>
+      <td>=($102+$60+$75) / 3</td>
+    </tr>
+    <tr>
+      <td>Customer B</td>
+      <td>$97</td>
+      <td>$85</td>
+      <td>$0</td>
+      <td>2</td>
+      <td>=($85+97) / 2</td>
+    </tr>
+    <tr>
+      <td>Customer C</td>
+      <td>$0</td>
+      <td>$9852</td>
+      <td>$0</td>
+      <td>1</td>
+      <td>=($9,852) / 1</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Once this is done add another column for Recency and fill that in with how long since that last purchase.  This can be days, hours, or seconds since last purchase depending on how far apart customer purchases typically are.  For this simplified version we will use days.  We end up with a table like this:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>Recency</th>
+      <th>Frequency</th>
+      <th>Monetary Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Customer A</td>
+      <td>3</td>
+      <td>3</td>
+      <td>$79</td>
+    </tr>
+    <tr>
+      <td>Customer B</td>
+      <td>35</td>
+      <td>2</td>
+      <td>$91</td>
+    </tr>
+    <tr>
+      <td>Customer C</td>
+      <td>48</td>
+      <td>1</td>
+      <td>$9852</td>
+    </tr>
+  </tbody>
+</table>
+
+<h1 id="conduct-ab-testing">
+<a class="anchor" href="#conduct-ab-testing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conduct A/B testing:</h1>
+
+<p>Now that we have three metrics (RFM) that describe customer buying patterns, we can start using them to run experiments to drive revenue growth.  A/B testing is a simple experiment that you can run to compare two things. You split your customers into two group and make no change to what you are doing to group A, but do something different in group B.  By doing this we can compare the revenue of the two groups to see what impact our efforts had.  If B is better, we will apply that action to the entire customer base.  If not, we scrap the idea and move on.  This is a never-ending process of  testing new ideas.</p>
+
+<h1 id="heres-a-few-ideas-for-ab-tests-using-rfm-to-get-you-started">
+<a class="anchor" href="#heres-a-few-ideas-for-ab-tests-using-rfm-to-get-you-started" aria-hidden="true"><span class="octicon octicon-link"></span></a>Here’s a few ideas for A/B tests using RFM to get you started:</h1>
+
+<ul>
+  <li>Call every customer in group B to see how that impacts revenue.  Does this increase Frequency (F) or average Monetary Value (M) of orders?  Is it worth the additional resources?</li>
+  <li>Send a marketing email blast to everyone in group B.  How does this change group B’s buying patterns?</li>
+  <li>What impact does sending a one-time-only 5\% off coupon have?</li>
+  <li>If we raise the price by 5\% in group B, what is the effect on revenue?  This is especially useful because we can run limited experiments and gauge reaction of price hikes without angering every customer.</li>
+  <li>If we raise the price on a product that is nearing the end of its product life cycle, do sales increase on the newly released product?  Does a price hike on old products encourage customers to buy newer versions?</li>
+  <li>Send group A customers to the current website and group B customers to a new website layout.  Monitor sales, traffic, and clicks on each site.  This can help determine the better layout.</li>
+</ul>
+
+  </div><a class="u-url" href="/fastblog/customer%20analytics/2020/05/10/Customer-Analytics-Part-1.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/fastblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/fastblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/fastblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>An easy to use blogging platform with support for Jupyter Notebooks.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/fastai" title="fastai"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/fastdotai" title="fastdotai"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

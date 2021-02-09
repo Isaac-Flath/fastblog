@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Media Bias Text Generation Transformer | fastpages</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Media Bias Text Generation Transformer" />
+<meta name="author" content="Isaac Flath" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A glimpse at a few outputs of the Text Generation Transformer project" />
+<meta property="og:description" content="A glimpse at a few outputs of the Text Generation Transformer project" />
+<link rel="canonical" href="https://isaac-flath.github.io/fastblog/neural%20networks/2020/11/01/MediaBiasTransformer.html" />
+<meta property="og:url" content="https://isaac-flath.github.io/fastblog/neural%20networks/2020/11/01/MediaBiasTransformer.html" />
+<meta property="og:site_name" content="fastpages" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-11-01T00:00:00-05:00" />
+<script type="application/ld+json">
+{"url":"https://isaac-flath.github.io/fastblog/neural%20networks/2020/11/01/MediaBiasTransformer.html","@type":"BlogPosting","headline":"Media Bias Text Generation Transformer","dateModified":"2020-11-01T00:00:00-05:00","datePublished":"2020-11-01T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://isaac-flath.github.io/fastblog/neural%20networks/2020/11/01/MediaBiasTransformer.html"},"author":{"@type":"Person","name":"Isaac Flath"},"description":"A glimpse at a few outputs of the Text Generation Transformer project","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/fastblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://isaac-flath.github.io/fastblog/feed.xml" title="fastpages" /><link rel="shortcut icon" type="image/x-icon" href="/fastblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/fastblog/">fastpages</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/fastblog/about/">About Me</a><a class="page-link" href="/fastblog/search/">Search</a><a class="page-link" href="/fastblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Media Bias Text Generation Transformer</h1><p class="page-description">A glimpse at a few outputs of the Text Generation Transformer project</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-11-01T00:00:00-05:00" itemprop="datePublished">
+        Nov 1, 2020
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Isaac Flath</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      6 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Neural Networks">Neural Networks</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/Isaac-Flath/fastblog/tree/master/_notebooks/2020-11-01-MediaBiasTransformer.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/fastblog/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/Isaac-Flath/fastblog/master?filepath=_notebooks%2F2020-11-01-MediaBiasTransformer.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/Isaac-Flath/fastblog/blob/master/_notebooks/2020-11-01-MediaBiasTransformer.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Goals">Goals </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Project-Goals">Project Goals </a></li>
+<li class="toc-entry toc-h3"><a href="#Article-Goals">Article Goals </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Prompt-Examples">Prompt Examples </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Scientists">Scientists </a></li>
+<li class="toc-entry toc-h3"><a href="#Antifa">Antifa </a></li>
+<li class="toc-entry toc-h3"><a href="#Closing">Closing </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Word-Count">Word Count </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Approach">Approach </a></li>
+<li class="toc-entry toc-h3"><a href="#Get-word-counts-for-each-group">Get word counts for each group </a></li>
+<li class="toc-entry toc-h3"><a href="#Exclude-stop-words">Exclude stop words </a></li>
+<li class="toc-entry toc-h3"><a href="#Frequency-Graphs">Frequency Graphs </a></li>
+</ul>
+</li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2020-11-01-MediaBiasTransformer.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Goals">
+<a class="anchor" href="#Goals" aria-hidden="true"><span class="octicon octicon-link"></span></a>Goals<a class="anchor-link" href="#Goals"> </a>
+</h1>
+<h3 id="Project-Goals">
+<a class="anchor" href="#Project-Goals" aria-hidden="true"><span class="octicon octicon-link"></span></a>Project Goals<a class="anchor-link" href="#Project-Goals"> </a>
+</h3>
+<p><strong>Gain Competence doing Text Generation using transformers</strong></p>
+<p>I wanted to learn a bit more about text generation, and these transformers that are taking over text generation.  I chose to work with GPT2, and found that the HuggingFace transformers and library came very highly recommended.</p>
+<p><strong>Get a glimpse in differences in bias from different media sources</strong></p>
+<p>I have recently been reading news from several media sources, and I am often astounded by the differences.  What I wanted to do, is take a pre-trained model and fine tune it on a specific media source.  Do this several times on different sources and compare.  In what ways will my models be biased by their source?  One might hypothesise that this would show some of the biases that people may be nudged toward by only consuming that media source.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Article-Goals">
+<a class="anchor" href="#Article-Goals" aria-hidden="true"><span class="octicon octicon-link"></span></a>Article Goals<a class="anchor-link" href="#Article-Goals"> </a>
+</h3>
+<p>The purpose of this article is just to show some of the outputs and get people thinking about how an approach like this could be interesting and useful to study further.  The bulk of the project was on setting up and fine-tuning transformers, which is not at all what this article is about.  This article is about looking at some of the outputs in order to spur additional thought on the topic</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Prompt-Examples">
+<a class="anchor" href="#Prompt-Examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Prompt Examples<a class="anchor-link" href="#Prompt-Examples"> </a>
+</h1>
+<p>Let's start by looking at a couple prompts to see how we might compare them manually.  We will take a look at a coupe of examples.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Scientists">
+<a class="anchor" href="#Scientists" aria-hidden="true"><span class="octicon octicon-link"></span></a>Scientists<a class="anchor-link" href="#Scientists"> </a>
+</h3>
+<p>In this case, the models were each given the prompt "The reason Scientists do press briefings is".  Can you spot the outlier?</p>
+<blockquote>
+<p><strong>CNBC:</strong> The reason Scientists do press briefings is because they want to know what's going on in the world," he said. "If you don't have a clear understanding of where things are, it can be very difficult for scientists to get their work done.<br><br><strong>CNN:</strong> The reason Scientists do press briefings is because they want to know what's going on in the world," he said. "They're trying to get a sense of where things are."<br><br><strong>Fox News:</strong> The reason Scientists do press briefings is because they're trying to find out more about what the Russians are up to<br><br><strong>The New York Times:</strong> The reason Scientists do press briefings is that it’s a way for them to get the most out of their time<br><br><strong>Washington Post:</strong> The reason Scientists do press briefings is because they’re the only ones who know what's going on.</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Antifa">
+<a class="anchor" href="#Antifa" aria-hidden="true"><span class="octicon octicon-link"></span></a>Antifa<a class="anchor-link" href="#Antifa"> </a>
+</h3>
+<p>Another area where there's quite a bit of contrast is Antifa.  Which one doesn't match the others?</p>
+<blockquote>
+<p><strong>CNBC:</strong> Antifa is a group that has been active in the U.S. for more than 50 years, according to its website. "We are committed to protecting our community from violence and hate," it says on its website.<br><br><strong>CNN:</strong> Antifa is a group that advocates for the rights of people to peacefully assemble, organize and participate in peaceful protests.<br><br><strong>Fox News:</strong> Antifa is a group that's trying to take down the president of the United States. And so, I don't think it's going to be easy for them to come in and do what they want to do.<br><br><strong>The New York Times:</strong> Antifa is a group that has been active since the beginning of the year, and it's not clear how many people have joined. <br><br><strong>Washington Post:</strong> Antifa is a group that advocates for the rights of women and girls to self-identify as LGBTQ, according to its website.</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Closing">
+<a class="anchor" href="#Closing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Closing<a class="anchor-link" href="#Closing"> </a>
+</h3>
+<p>Now it's fairly entertaining to read through the ones that really demonstrate bias, like this one:</p>
+<blockquote>
+<p><strong>Fox News:</strong> The thing we should do with immigrants is make sure that they're not coming to the United States illegally. (END VIDEO CLIP) INGRAHAM: Well, I don't know if you have a lot of sympathy for those who are trying to come into this country as unaccompanied minors or people in their 20s and 30s being separated from their parents because it seems like every single one of them has some kind of criminal record which makes us all very worried about these kids crossing our southern border at any given time.</p>
+</blockquote>
+<p>and to read zingers like this one</p>
+<blockquote>
+<p><strong>CNBC:</strong> The most hated politician is Donald Trump, and he's got a lot of problems</p>
+</blockquote>
+<p>and run across snippets like this</p>
+<blockquote>
+<p>"The landmark summit between North Korean leader Kim Jong Un and dictator-in-waiting Donald Trump"</p>
+</blockquote>
+<p>But that's a pretty biased way of analyzing things.  So instead let's look at overall word counts and see if there is a difference in word choice between these models.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Word-Count">
+<a class="anchor" href="#Word-Count" aria-hidden="true"><span class="octicon octicon-link"></span></a>Word Count<a class="anchor-link" href="#Word-Count"> </a>
+</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Approach">
+<a class="anchor" href="#Approach" aria-hidden="true"><span class="octicon octicon-link"></span></a>Approach<a class="anchor-link" href="#Approach"> </a>
+</h3>
+<p>I came up with a bunch of prompts and gave them to each model.  Now, I will count the number of times words appear to see if there are any differences in word choice between media sources.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Get-word-counts-for-each-group">
+<a class="anchor" href="#Get-word-counts-for-each-group" aria-hidden="true"><span class="octicon octicon-link"></span></a>Get word counts for each group<a class="anchor-link" href="#Get-word-counts-for-each-group"> </a>
+</h3>
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">nltk</span>
+<span class="kn">from</span> <span class="nn">nltk.corpus</span> <span class="kn">import</span> <span class="n">stopwords</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The first step is to read in the text file with text generated by the model (Go to that URL if you want to see more).</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description" open="">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'https://raw.githubusercontent.com/Isaac-Flath/MediaBias/main/text_generated.csv'</span><span class="p">,</span>
+            <span class="n">usecols</span><span class="o">=</span><span class="p">[</span><span class="s1">'source'</span><span class="p">,</span><span class="s1">'prompt'</span><span class="p">,</span><span class="s1">'text'</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will then convert everything to lowercase and get rid of punctuation</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description" open="">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">RegexpTokenizer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\w+"</span><span class="p">)</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">'text'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">tokenize</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Finally we count all the words and put it into a pandas data frame for convenience</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description" open="">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">'text'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">)</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">())],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">results</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'words'</span><span class="p">,</span><span class="s1">'all_cnt'</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now, we repeat this same thing for each media source so we have word counts for each source (ie CNN)</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description" open="">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+  <span class="n">tempdf</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">source</span><span class="o">==</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+  <span class="n">tempcntr</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+  <span class="n">tempdf</span><span class="p">[</span><span class="s1">'text'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">tempcntr</span><span class="o">.</span><span class="n">update</span><span class="p">)</span>
+  <span class="n">tempresults</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">tempcntr</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">tempcntr</span><span class="o">.</span><span class="n">values</span><span class="p">())],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">tempresults</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'words'</span><span class="p">,</span><span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">' '</span><span class="p">,</span><span class="s1">''</span><span class="p">)</span><span class="o">+</span><span class="s1">'_cnt'</span><span class="p">]</span>
+  <span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="n">tempresults</span><span class="p">,</span> <span class="n">how</span> <span class="o">=</span> <span class="s1">'left'</span><span class="p">,</span> <span class="n">on</span> <span class="o">=</span> <span class="s1">'words'</span><span class="p">)</span>
+<span class="n">results</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">results</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>words</th>
+      <th>all_cnt</th>
+      <th>CNBC_cnt</th>
+      <th>CNN_cnt</th>
+      <th>FoxNews_cnt</th>
+      <th>TheNewYorkTimes_cnt</th>
+      <th>WashingtonPost_cnt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>blockchain</td>
+      <td>7</td>
+      <td>1.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>is</td>
+      <td>276</td>
+      <td>50.0</td>
+      <td>54.0</td>
+      <td>55.0</td>
+      <td>58.0</td>
+      <td>59.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>a</td>
+      <td>592</td>
+      <td>125.0</td>
+      <td>138.0</td>
+      <td>91.0</td>
+      <td>141.0</td>
+      <td>97.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>technology</td>
+      <td>12</td>
+      <td>4.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>that</td>
+      <td>513</td>
+      <td>92.0</td>
+      <td>105.0</td>
+      <td>92.0</td>
+      <td>106.0</td>
+      <td>118.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Exclude-stop-words">
+<a class="anchor" href="#Exclude-stop-words" aria-hidden="true"><span class="octicon octicon-link"></span></a>Exclude stop words<a class="anchor-link" href="#Exclude-stop-words"> </a>
+</h3>
+<p>We don't really care about some words.  For example, if one station uses "the" a bit more that doesn't mean much to me.  So let's remove stop words.</p>
+<p>Conveniently nltk has a list of english stop words already put together.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">stopwords</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="s1">'english'</span><span class="p">)[:</span><span class="mi">5</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>['i', 'me', 'my', 'myself', 'we']
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now let's use that to filter out dataframe for all stop words, as well as sort it in descending order so the most common words are at the top.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="o">~</span><span class="n">results</span><span class="o">.</span><span class="n">words</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">stopwords</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="s1">'english'</span><span class="p">))]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">results</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">'all_cnt'</span><span class="p">,</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Frequency-Graphs">
+<a class="anchor" href="#Frequency-Graphs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Frequency Graphs<a class="anchor-link" href="#Frequency-Graphs"> </a>
+</h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's graph the amount the count deviates from the average and see if there is any point looking further.  If these are all close to blank graphs (no deviation from average) then that means the text they generated uses almost the same words.</p>
+<p>In this case, we can see that they all deviate in different ways on different words.  So <strong>the media source impacted the models word choice</strong></p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description" open="">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">width</span><span class="p">,</span> <span class="n">indexes</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span><span class="n">ax2</span><span class="p">,</span><span class="n">ax3</span><span class="p">,</span><span class="n">ax4</span><span class="p">,</span><span class="n">ax5</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+
+<span class="n">ax_map</span> <span class="o">=</span> <span class="p">[(</span><span class="n">ax1</span><span class="p">,</span><span class="n">results</span><span class="o">.</span><span class="n">CNBC_cnt</span><span class="p">),(</span><span class="n">ax2</span><span class="p">,</span><span class="n">results</span><span class="o">.</span><span class="n">FoxNews_cnt</span><span class="p">),(</span><span class="n">ax3</span><span class="p">,</span><span class="n">results</span><span class="o">.</span><span class="n">CNN_cnt</span><span class="p">),</span>
+ <span class="p">(</span><span class="n">ax4</span><span class="p">,</span><span class="n">results</span><span class="o">.</span><span class="n">TheNewYorkTimes_cnt</span><span class="p">),(</span><span class="n">ax5</span><span class="p">,</span><span class="n">results</span><span class="o">.</span><span class="n">WashingtonPost_cnt</span><span class="p">)]</span>  
+
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ax_map</span><span class="p">:</span>
+  <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+  <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">indexes</span><span class="p">,</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">results</span><span class="o">.</span><span class="n">all_cnt</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span><span class="n">width</span><span class="p">)</span>
+  <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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%0A">
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="Isaac-Flath/fastblog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/fastblog/neural%20networks/2020/11/01/MediaBiasTransformer.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/fastblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/fastblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/fastblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>An easy to use blogging platform with support for Jupyter Notebooks.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/fastai" title="fastai"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/fastdotai" title="fastdotai"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Predictive Customer Analytics (Part 2) | fastpages</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Predictive Customer Analytics (Part 2)" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Simple and minimalistic predictive customer analytics starting point" />
+<meta property="og:description" content="Simple and minimalistic predictive customer analytics starting point" />
+<link rel="canonical" href="https://isaac-flath.github.io/fastblog/customer%20analytics/2020/05/12/Customer-Analytics-Part-2.html" />
+<meta property="og:url" content="https://isaac-flath.github.io/fastblog/customer%20analytics/2020/05/12/Customer-Analytics-Part-2.html" />
+<meta property="og:site_name" content="fastpages" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-12T00:00:00-05:00" />
+<script type="application/ld+json">
+{"url":"https://isaac-flath.github.io/fastblog/customer%20analytics/2020/05/12/Customer-Analytics-Part-2.html","@type":"BlogPosting","headline":"Predictive Customer Analytics (Part 2)","dateModified":"2020-05-12T00:00:00-05:00","datePublished":"2020-05-12T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://isaac-flath.github.io/fastblog/customer%20analytics/2020/05/12/Customer-Analytics-Part-2.html"},"description":"Simple and minimalistic predictive customer analytics starting point","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/fastblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://isaac-flath.github.io/fastblog/feed.xml" title="fastpages" /><link rel="shortcut icon" type="image/x-icon" href="/fastblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/fastblog/">fastpages</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/fastblog/about/">About Me</a><a class="page-link" href="/fastblog/search/">Search</a><a class="page-link" href="/fastblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Predictive Customer Analytics (Part 2)</h1><p class="page-description">Simple and minimalistic predictive customer analytics starting point</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-05-12T00:00:00-05:00" itemprop="datePublished">
+        May 12, 2020
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      8 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Customer Analytics">Customer Analytics</a>
+        
+      
+      </p>
+    
+
+    </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#intro">Intro</a></li>
+<li class="toc-entry toc-h1"><a href="#background">Background</a></li>
+<li class="toc-entry toc-h1"><a href="#normalize-the-metrics">Normalize the metrics</a></li>
+<li class="toc-entry toc-h1"><a href="#group-the-customers-together">Group the customers together</a></li>
+<li class="toc-entry toc-h1"><a href="#create-probability-matrix">Create probability matrix</a></li>
+<li class="toc-entry toc-h1"><a href="#increase-revenue-using-predicted-value-of-each-account">Increase revenue using predicted value of each account</a></li>
+</ul><h1 id="intro">
+<a class="anchor" href="#intro" aria-hidden="true"><span class="octicon octicon-link"></span></a>Intro</h1>
+
+<p>Customer Analytics is a valuable tool, but often the basics are overlooked. It can have a huge impact, and it doesn’t always mean complex modeling.  It always starts with the basics.</p>
+
+<p>This is the 2nd post in a series about customer analytics.  The first post discusses descriptive analytics and how to create and use descriptive customer analytics.  In this post we will be building on that descriptive framework to create a very basic predictive model.  A predictive model allows companies to plan proactively instead of reactively.</p>
+
+<h1 id="background">
+<a class="anchor" href="#background" aria-hidden="true"><span class="octicon octicon-link"></span></a>Background</h1>
+
+<p>In the first post we created three descriptive metrics (Recency, Frequency, and Average Monetary Value).  Recency is days since the last purchase.  Frequency is the number of cycles that the customer purchased product in.  Monetary Value is the average revenue brought in from that customer in cycles where the customer purchased product.  How can you determine the predicted customer value and take action based on that information?</p>
+
+<p>We need to group customers based on how they behave.  This allows us to quickly and efficiently test different actions and see how that affects our long term revenue projections.  A customer who  makes many small purchases may be just as valuable as a customer who places huge orders infrequently, but they should be handled differently.  RFM is one tool we can use to group customers together.</p>
+
+<h1 id="normalize-the-metrics">
+<a class="anchor" href="#normalize-the-metrics" aria-hidden="true"><span class="octicon octicon-link"></span></a>Normalize the metrics</h1>
+
+<p>We start with a basic table with three companies and their 3 KPIs.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>Recency (days since previous purchase)</th>
+      <th>Frequency (number of months with purchases)</th>
+      <th>Monetary Value (avg monthly revenue during months with purchases)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Customer A</td>
+      <td>3</td>
+      <td>3</td>
+      <td>$79</td>
+    </tr>
+    <tr>
+      <td>Customer B</td>
+      <td>35</td>
+      <td>2</td>
+      <td>$91</td>
+    </tr>
+    <tr>
+      <td>Customer C</td>
+      <td>48</td>
+      <td>1</td>
+      <td>$9852</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Now that we have values for each of these three metrics (Recency, Frequency, and Monetary Value), we need to put them into a format where we can easily compare the customers.  This is called normalizing the data.  Normalization puts all the metrics on a scale of 0 (lowest) to 1 (highest).   Here is a formula for normalizing:</p>
+
+<p><code class="language-plaintext highlighter-rouge">(&lt;Value you want to normalize&gt; – &lt;Minimum Value in series&gt;) / (&lt;Maximum value in series&gt; – &lt;Minimum value in series&gt;)</code></p>
+
+<p>Let’s walk through normalizing the Recency KPI.  Based on the formula above we need a couple of pieces of information.  Let’s identify these now.</p>
+
+<p>Minimum Value in series = 3
+Maximum value in series = 48</p>
+
+<p>Now let’s plug in the formula for each customer to normalize the values.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>Recency</th>
+      <th>Normalized Recency</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Customer A</td>
+      <td>3</td>
+      <td>=(3-3) / (48-3) = 0</td>
+    </tr>
+    <tr>
+      <td>Customer B</td>
+      <td>35</td>
+      <td>=(35-3) / (48-3) = 0.711</td>
+    </tr>
+    <tr>
+      <td>Customer C</td>
+      <td>48</td>
+      <td>=(48-3) / (48-3) = 1</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The next step is to repeat this process for the other metrics.  I won’t walk through the other two, but here are the accurate values if you’d like to test yourself.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>Recency</th>
+      <th>Frequency</th>
+      <th>Monetary Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Customer A</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Customer B</td>
+      <td>0.711</td>
+      <td>0.5</td>
+      <td>0.001</td>
+    </tr>
+    <tr>
+      <td>Customer C</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>A low recency score is good.  A high Frequency or Monetary Value Score is good.  If you’d like to simplify it so you don’t have to remember that feel free to take your normalized recency score and subtract it from 1.  That will make low scores bad and high scores good on all metrics.</p>
+
+<h1 id="group-the-customers-together">
+<a class="anchor" href="#group-the-customers-together" aria-hidden="true"><span class="octicon octicon-link"></span></a>Group the customers together</h1>
+
+<p>Now that we have normalized our KPIs, we need to group our customers together.  In the table above we only have 3 customers, so there would be no point in grouping them together.  In a more practical example we may have 1000 customers, 10,000 customers, or more.  When we have that many customers, we can greatly simplify things by grouping like customers together.</p>
+
+<p>We can group customers using our RFM KPIs, but there may be more information we want to pull into that decision.  For example if we are a manufacturing company that sells product to end users as well as distributors we may want to take that into account.  A distributor is likely to behave and react differently from an individual person.  For example, an individual person may get a coupon in the mail and decide to purchase, but a distributor contact may get hundreds of coupons a week and just get annoyed.</p>
+
+<p>A lot of time should be spent exploring different ways to break up customers.  Explaining how you break up the customers into groups to sales people, product management, purchasing, production control, and other functional groups in your company can be a great way to get ideas.  Each of these groups sees how customers react in different ways and talking to all of them can help give a more complete picture.</p>
+
+<h1 id="create-probability-matrix">
+<a class="anchor" href="#create-probability-matrix" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create probability matrix</h1>
+
+<p>The goal of customer analytics is to predict how much money we are going to make next month, and the month after, and the month after that, and so on.  Once we can predict that with reasonable accuracy we can determine exactly how much revenue we can expect from each customer if we do not change anything.</p>
+
+<p>We need to put probabilities on customer actions.  In simplest terms the customer has 2 choices during each cycle, buy or do not buy.  So how do we figure out what the chance of that is for a group?</p>
+
+<p>Suppose we a group of distributors we sell to that we believe act similarly as with the table below.  A 1 means that the distributor bought something in that cycle, a 0 means that the distributor did not buy anything in that cycle.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>January</th>
+      <th>February</th>
+      <th>March</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Distributor A</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Distributor B</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Distributor C</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Since there are 9 total opportunities to buy, and 4 of those have buys in them, we will assign a 4/9 chance of buying.  Really this is just another way to measure frequency.</p>
+
+<p>Now we know how many of the customers in the distributor group will buy in a given month (4 out of 9), so we need to turn that into a revenue figure.  To do this we will take the sum of revenue from these customers and divide that by the number of buys.  Here we are calculating Monetary Value (M), but instead of looking at it on a customer level, we are looking at it for a group of customers.</p>
+
+<p>Once we multiply those two numbers together we have an estimated monthly revenue.</p>
+
+<p>There’s several areas for future improvement that I won’t cover in this post.  Depending on the market or the business model your company uses, they will vary in significance.  Here’s a few of them:</p>
+
+<ul>
+  <li>Take into account recency.</li>
+  <li>Take into account customer retention.  This makes forecasts accuracy go down farther out you go into the future.  Since for this application we aren’t looking out very far in the future it makes less of a difference, but it is definitely high priority on our list of future enhancements.</li>
+  <li>Changes in buy patterns based on seasonal trends.</li>
+</ul>
+
+<h1 id="increase-revenue-using-predicted-value-of-each-account">
+<a class="anchor" href="#increase-revenue-using-predicted-value-of-each-account" aria-hidden="true"><span class="octicon octicon-link"></span></a>Increase revenue using predicted value of each account</h1>
+
+<p>Now that we know roughly what revenue we can expect, we can use that for a variety of things.  Here’s a few ideas:</p>
+
+<ul>
+  <li>First, we can look at which locations/territories are performing as forcasted.  Once we know the high performing locations and the low performing locations, we can start to identify what the differences are. This can also be used to manage performance of employees, set meaningful incentives based on revenue, and set measurable objectives.</li>
+  <li>We can continue to do A/B testing, but be able to tie this to actual revenue dollars.</li>
+  <li>We can use these forecasts to determine inventory stances on either components or salable goods.</li>
+  <li>Now that we have grouped customers that behave similarly, we can start to determine how we should treat each group.  We can have limited A/B testing.  Instead of taking a random group of customers, we can take a random group of distributors to see how they specifically react.</li>
+  <li>We can determine who our most valuable customers are.  Typically without measures, we remember the big purchases.  But a regular purchaser that doesn’t make big purchases may be bringing us more revenue.  Understanding which customers are most likely to be the most profitable is crucial and can help us determine pricing tiers for customers or determine customer loyalty programs.</li>
+  <li>We can identify low performing groups and create a strategy to get more penetration into those customers.  Maybe for those customers we can send them surveys.  Maybe we can set up a forum and do 6 month surveys where we work and collaborate with them regularly.  This can help give insight into why they don’t purchase much, as well as be a good sales opportunity.  We can also try to take action to take the low performing customers and get them to increase revenue through promotions or other incentives.</li>
+  <li>We can take the high performing customers and make sure that they know they are appreciated.  Whether it’s a can of cashews over the holidays, or having a sales person reach out to talk once a month, building that relationship can really build customer loyalty.</li>
+</ul>
+
+  </div><a class="u-url" href="/fastblog/customer%20analytics/2020/05/12/Customer-Analytics-Part-2.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/fastblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/fastblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/fastblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>An easy to use blogging platform with support for Jupyter Notebooks.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/fastai" title="fastai"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/fastdotai" title="fastdotai"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

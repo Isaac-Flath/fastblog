@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>RNN Foundations | fastpages</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="RNN Foundations" />
+<meta name="author" content="Isaac Flath" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="What is an RNN? How does NLP work?" />
+<meta property="og:description" content="What is an RNN? How does NLP work?" />
+<link rel="canonical" href="https://isaac-flath.github.io/fastblog/neural%20networks/2020/08/22/RNN_Foundations.html" />
+<meta property="og:url" content="https://isaac-flath.github.io/fastblog/neural%20networks/2020/08/22/RNN_Foundations.html" />
+<meta property="og:site_name" content="fastpages" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-08-22T00:00:00-05:00" />
+<script type="application/ld+json">
+{"url":"https://isaac-flath.github.io/fastblog/neural%20networks/2020/08/22/RNN_Foundations.html","@type":"BlogPosting","headline":"RNN Foundations","dateModified":"2020-08-22T00:00:00-05:00","datePublished":"2020-08-22T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://isaac-flath.github.io/fastblog/neural%20networks/2020/08/22/RNN_Foundations.html"},"author":{"@type":"Person","name":"Isaac Flath"},"description":"What is an RNN? How does NLP work?","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/fastblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://isaac-flath.github.io/fastblog/feed.xml" title="fastpages" /><link rel="shortcut icon" type="image/x-icon" href="/fastblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/fastblog/">fastpages</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/fastblog/about/">About Me</a><a class="page-link" href="/fastblog/search/">Search</a><a class="page-link" href="/fastblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">RNN Foundations</h1><p class="page-description">What is an RNN?  How does NLP work?</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-08-22T00:00:00-05:00" itemprop="datePublished">
+        Aug 22, 2020
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Isaac Flath</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      13 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Neural Networks">Neural Networks</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/Isaac-Flath/fastblog/tree/master/_notebooks/2020-08-22-RNN_Foundations.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/fastblog/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/Isaac-Flath/fastblog/master?filepath=_notebooks%2F2020-08-22-RNN_Foundations.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/Isaac-Flath/fastblog/blob/master/_notebooks/2020-08-22-RNN_Foundations.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Credit-Where-Credit-is-Due">Credit Where Credit is Due </a></li>
+<li class="toc-entry toc-h1"><a href="#Data-Setup">Data Setup </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Get-the-Data">Get the Data </a></li>
+<li class="toc-entry toc-h3"><a href="#Tokenization">Tokenization </a></li>
+<li class="toc-entry toc-h3"><a href="#Numericalization">Numericalization </a></li>
+<li class="toc-entry toc-h3"><a href="#Sequence-Definition">Sequence Definition </a></li>
+<li class="toc-entry toc-h3"><a href="#Dataloader">Dataloader </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Language-Model">Language Model </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Naive-Model">Naive Model </a></li>
+<li class="toc-entry toc-h3"><a href="#RNN-Number-1">RNN Number 1 </a>
+<ul>
+<li class="toc-entry toc-h5"><a href="#Code">Code </a></li>
+<li class="toc-entry toc-h5"><a href="#Tensors">Tensors </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h3"><a href="#RNN-Number-2">RNN Number 2 </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Conclusion">Conclusion </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2020-08-22-RNN_Foundations.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">fastai.text.all</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Credit-Where-Credit-is-Due">
+<a class="anchor" href="#Credit-Where-Credit-is-Due" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credit Where Credit is Due<a class="anchor-link" href="#Credit-Where-Credit-is-Due"> </a>
+</h1>
+<p>The concept and techniques covered in this post are covered in much greater detail in Jeremy Howard and Sylvain Gugger's book.  If you like this post, you should buy the book as you'll probably like it even more!</p>
+<p><a href="https://www.amazon.com/gp/product/1492045527/ref=ppx_yo_dt_b_asin_image_o08_s00?ie=UTF8&amp;psc=1%7C">https://www.amazon.com/gp/product/1492045527/ref=ppx_yo_dt_b_asin_image_o08_s00?ie=UTF8&amp;psc=1|</a></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Data-Setup">
+<a class="anchor" href="#Data-Setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data Setup<a class="anchor-link" href="#Data-Setup"> </a>
+</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Get-the-Data">
+<a class="anchor" href="#Get-the-Data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Get the Data<a class="anchor-link" href="#Get-the-Data"> </a>
+</h3>
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="n">untar_data</span><span class="p">(</span><span class="n">URLs</span><span class="o">.</span><span class="n">HUMAN_NUMBERS</span><span class="p">)</span>
+<span class="n">lines</span> <span class="o">=</span> <span class="n">L</span><span class="p">()</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="o">/</span><span class="s2">"train.txt"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span> <span class="n">lines</span> <span class="o">+=</span> <span class="n">L</span><span class="p">(</span><span class="o">*</span><span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">())</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="o">/</span><span class="s2">"valid.txt"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span> <span class="n">lines</span> <span class="o">+=</span> <span class="n">L</span><span class="p">(</span><span class="o">*</span><span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">())</span>
+<span class="n">lines</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(#9998) ['one \n','two \n','three \n','four \n','five \n','six \n','seven \n','eight \n','nine \n','ten \n'...]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Tokenization">
+<a class="anchor" href="#Tokenization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Tokenization<a class="anchor-link" href="#Tokenization"> </a>
+</h3>
+<p>What is Tokenization?  Tokenization is about getting 'tokens' of language that have meaning.  A word could be a token as it has meaning.  A piece of punctuation could be a token as it has meaning.  If a work is in all capital letters that could be a token.  A portion of a word could be a token (ie dis) because a word beginning with dis has meaning.  There are many many ways to tokenize, for this post I will use the most simple approach.  That is, I will split based on spaces to make each word a token.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">txt</span> <span class="o">=</span> <span class="s1">' . '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tokens</span> <span class="o">=</span> <span class="n">L</span><span class="p">(</span><span class="o">*</span><span class="n">txt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">' '</span><span class="p">));</span> <span class="n">tokens</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(#63095) ['one','.','two','.','three','.','four','.','five','.'...]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Numericalization">
+<a class="anchor" href="#Numericalization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Numericalization<a class="anchor-link" href="#Numericalization"> </a>
+</h3>
+<p>Now that things are split into tokens, we need to start thinking about how to feed it to a Neural Network.  Neural Networks rely on multiplication and addition, and we can't do that with a word.  Somehow we need to convert these tokens to numbers.  That is what Numericalization is all about.  We will do this in a few steps:</p>
+<ol>
+<li>Get a unique list of all tokens (v)</li>
+<li>Assign a number to each of token (vocab)</li>
+<li>Replace tokens with numbers (nums)</li>
+</ol>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">v</span> <span class="o">=</span> <span class="n">tokens</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+
+<span class="c1"># Assign a number to each of token (vocab)</span>
+<span class="n">vocab</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">v</span><span class="p">)};</span>
+
+<span class="c1"># We can lookup the number associated with a token like this</span>
+<span class="n">vocab</span><span class="p">[</span><span class="s1">'fifty'</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>23</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nums</span> <span class="o">=</span> <span class="n">L</span><span class="p">(</span><span class="n">vocab</span><span class="p">[</span><span class="n">tok</span><span class="p">]</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">);</span> <span class="n">nums</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(#63095) [0,1,2,1,3,1,4,1,5,1...]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Sequence-Definition">
+<a class="anchor" href="#Sequence-Definition" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sequence Definition<a class="anchor-link" href="#Sequence-Definition"> </a>
+</h3>
+<p>Now that we have tokens in the form of numbers, we need to create out inputs and outputs to the model.  For this we need to organize our data into dependent and independent variables.  Let's use the preceding 3 words to predict the next word.  Below, we see the same thing in 2 ways - one with tokens and one with numbers.  These are the same thing, just translating the tokens to numbers using the vocab above.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>Sequence Length (sl) will be 3, because we are using a sequence of 3 words to predict the next word.
+</div>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sl</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="c1"># For example, we will use the tokens 'one','.', and 'two' to predict '.'</span>
+<span class="n">L</span><span class="p">((</span><span class="n">tokens</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">sl</span><span class="p">],</span> <span class="n">tokens</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">sl</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span><span class="o">-</span><span class="n">sl</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">sl</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(#21031) [((#3) ['one','.','two'], '.'),((#3) ['.','three','.'], 'four'),((#3) ['four','.','five'], '.'),((#3) ['.','six','.'], 'seven'),((#3) ['seven','.','eight'], '.'),((#3) ['.','nine','.'], 'ten'),((#3) ['ten','.','eleven'], '.'),((#3) ['.','twelve','.'], 'thirteen'),((#3) ['thirteen','.','fourteen'], '.'),((#3) ['.','fifteen','.'], 'sixteen')...]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">seqs</span> <span class="o">=</span> <span class="n">L</span><span class="p">((</span><span class="n">tensor</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">sl</span><span class="p">]),</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">sl</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span><span class="o">-</span><span class="n">sl</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">sl</span><span class="p">));</span> <span class="n">seqs</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(#21031) [(tensor([0, 1, 2]), 1),(tensor([1, 3, 1]), 4),(tensor([4, 1, 5]), 1),(tensor([1, 6, 1]), 7),(tensor([7, 1, 8]), 1),(tensor([1, 9, 1]), 10),(tensor([10,  1, 11]), 1),(tensor([ 1, 12,  1]), 13),(tensor([13,  1, 14]), 1),(tensor([ 1, 15,  1]), 16)...]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Dataloader">
+<a class="anchor" href="#Dataloader" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dataloader<a class="anchor-link" href="#Dataloader"> </a>
+</h3>
+<p>Now we need to create out dataloader.  The Dataloader is just packaging it into batches, and not doing any tranformations or changes to the data.  What we saw above is what will be given to the model.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">bs</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">cut</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seqs</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">)</span>
+<span class="n">dls</span> <span class="o">=</span> <span class="n">DataLoaders</span><span class="o">.</span><span class="n">from_dsets</span><span class="p">(</span><span class="n">seqs</span><span class="p">[:</span><span class="n">cut</span><span class="p">],</span><span class="n">seqs</span><span class="p">[</span><span class="n">cut</span><span class="p">:],</span><span class="n">bs</span><span class="o">=</span><span class="n">bs</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dls2</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">seqs</span><span class="p">[:</span><span class="n">cut</span><span class="p">],</span><span class="n">bs</span><span class="o">=</span><span class="n">bs</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">dls3</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">seqs</span><span class="p">[</span><span class="n">cut</span><span class="p">:],</span><span class="n">bs</span><span class="o">=</span><span class="n">bs</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">dls4</span> <span class="o">=</span> <span class="n">DataLoaders</span><span class="p">(</span><span class="n">dls3</span><span class="p">,</span><span class="n">dls3</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Language-Model">
+<a class="anchor" href="#Language-Model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Language Model<a class="anchor-link" href="#Language-Model"> </a>
+</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Naive-Model">
+<a class="anchor" href="#Naive-Model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Naive Model<a class="anchor-link" href="#Naive-Model"> </a>
+</h3>
+<p>First, let's figure out a baseline for what is the best 'non-stupid' model we can come up with.  If a model can't beat this score, then it's not worth anything.</p>
+<p>The approach we will take will be to predict the most common token every time.  If we do that we get about a 15% accuracy.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">n</span><span class="p">,</span><span class="n">counts</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vocab</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">dls</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
+    <span class="n">n</span> <span class="o">+=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">range_of</span><span class="p">(</span><span class="n">vocab</span><span class="p">):</span> <span class="n">counts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">y</span><span class="o">==</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">long</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+<span class="n">idx</span><span class="p">,</span> <span class="n">v</span><span class="p">[</span><span class="n">idx</span><span class="o">.</span><span class="n">item</span><span class="p">()],</span> <span class="n">counts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="o">/</span><span class="n">n</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(tensor(29), 'thousand', 0.15165200855716662)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="RNN-Number-1">
+<a class="anchor" href="#RNN-Number-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>RNN Number 1<a class="anchor-link" href="#RNN-Number-1"> </a>
+</h3>
+<h5 id="Code">
+<a class="anchor" href="#Code" aria-hidden="true"><span class="octicon octicon-link"></span></a>Code<a class="anchor-link" href="#Code"> </a>
+</h5>
+<p>We are going to make the simplest RNN we can.  Here's a quick explanation of the code below.</p>
+<p><code>for i in range(sl):</code>
+Because we are feeding in a number of tokens based on our sequence length, sl, which was defined as 3.  We will have 3 steps, 1 per token.</p>
+<p><code>h = h + self.i_h(x[:,i])</code>
+For each input token we will run our input to hidden function.  We are indexing to grab the column in our embedding matrix that corresponds with the token, and adding that. All this is doing is adding the embedding for the particular token.</p>
+<p><code>h = F.relu(self.h_h(h))</code>
+We then run our hidden to hidden function (h_h), which is a linear layer (y = wx + b).  We do a ReLu of that, which is just replacing any negative values with 0.</p>
+<p><code>return self.h_o(h)</code>
+We then run our hidden to output function (h_o), which is another linear layer, but it is outputing the prediction of which word is next.  Naturally, this is the size of our vocabulary.</p>
+<p>Wrap all that in a class and it looks like the below:</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LM1</span><span class="p">(</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vocab_sz</span><span class="p">,</span> <span class="n">n_hidden</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">i_h</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">vocab_sz</span><span class="p">,</span> <span class="n">n_hidden</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h_h</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">n_hidden</span><span class="p">,</span> <span class="n">n_hidden</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h_o</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">n_hidden</span><span class="p">,</span><span class="n">vocab_sz</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sl</span><span class="p">):</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">i_h</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h_h</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_o</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we can run it below and see that we get almost 50% accuracy before we overfit, which is great considering the most common token only appears 15% of the time.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">learn</span> <span class="o">=</span> <span class="n">Learner</span><span class="p">(</span><span class="n">dls</span><span class="p">,</span> <span class="n">LM1</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vocab</span><span class="p">),</span> <span class="mi">64</span><span class="p">),</span> <span class="n">loss_func</span><span class="o">=</span><span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="n">accuracy</span><span class="p">)</span>
+<span class="n">learn</span><span class="o">.</span><span class="n">fit_one_cycle</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th>epoch</th>
+      <th>train_loss</th>
+      <th>valid_loss</th>
+      <th>accuracy</th>
+      <th>time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>2.505863</td>
+      <td>2.136583</td>
+      <td>0.458046</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>1.602575</td>
+      <td>1.847033</td>
+      <td>0.480865</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>1.503249</td>
+      <td>1.727588</td>
+      <td>0.492275</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>1.436492</td>
+      <td>1.771485</td>
+      <td>0.410506</td>
+      <td>00:00</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h5 id="Tensors">
+<a class="anchor" href="#Tensors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Tensors<a class="anchor-link" href="#Tensors"> </a>
+</h5>
+<p>So what is it REALLY doing?  To understand that, I find it helpful to think about the matrix/tensor sizes at each step.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Embeddings</strong></p>
+<p>Let's start with our input_hidden.  Our Embedding matrix is has 64 weights (n_hidden) for each token in our vocabulary.  So that looks like this:</p>
+<p>$\underbrace{
+\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}_{\displaystyle 64-weights}
+\left.\vphantom{\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}\right\}30-tokens$</p>
+<p>Now all the embedding layer does is get the correct columns.  So for the first word in the sequence we get the index, then look it up in the embedding matrix.  That 1 index location turns into the 64 weights.</p>
+<p>$\underbrace{
+\begin{bmatrix}
+\cdots \\
+\cdots \\ 
+\cdots \\
+\cdots \\
+\cdots \\
+\cdots \\
+\end{bmatrix}}_{\displaystyle token-idx}
+\left.\vphantom{\begin{bmatrix}
+\cdots \\
+\cdots \\ 
+\cdots \\
+\cdots \\
+\cdots \\
+\cdots \\
+\end{bmatrix}}\right\}128-bs$
+$==$
+lookup in embedding matrix
+$==&gt;$
+$\underbrace{
+\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}_{\displaystyle 64}
+\left.\vphantom{\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}\right\}128$</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Hidden Linear Layer</strong></p>
+<p>Next, we have out hidden_hidden.  We have our 128x64 matrix from our embedding lookup and we need to do a linear layer.</p>
+<p>$\underbrace{
+\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}_{\displaystyle 64-weights}
+\left.\vphantom{\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}\right\}128-bs$
+$\underbrace{
+\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}_{\displaystyle 64}
+\left.\vphantom{\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}\right\}64$
+$+$
+$\underbrace{
+\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}_{\displaystyle 64-bias}
+\left.\vphantom{\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}\right\}1$
+$=$
+$\underbrace{
+\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}_{\displaystyle 64-weights}
+\left.\vphantom{\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}\right\}128-bs$
+===ReLu - Replace all negatives with 0 ===&gt;
+$\underbrace{
+\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}_{\displaystyle 64-weights}
+\left.\vphantom{\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}\right\}128-bs$</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>And we do the above for however long our sequence is, in our case 3.  So for each token we do the above.  We start with 0 on the first loop, and each subsequence loop through we add onto that.</p>
+<p><strong>Ouput Linear Layer</strong></p>
+<p>We ended with a 128x64 matrix, which isn't exactly what we want.  We have 30 words, so we want to know which one of the 30 is most likely.  Specifically for each of the 128 items in our batch, we want 30 scores (1 for each word in our vocab).  So we do a similar stepp as our hidden linear layer, but adjust the number of weights so we end up with the matrix of the appropriate size.</p>
+<p>$\underbrace{
+\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}_{\displaystyle 64-weights}
+\left.\vphantom{\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}\right\}128-bs$
+$\underbrace{
+\begin{bmatrix}
+\cdots &amp; \cdots\\
+\cdots &amp; \cdots\\
+\cdots &amp; \cdots\\
+\cdots &amp; \cdots\\
+\end{bmatrix}}_{\displaystyle 30}
+\left.\vphantom{\begin{bmatrix}
+\cdots &amp; \cdots\\
+\cdots &amp; \cdots\\
+\cdots &amp; \cdots\\
+\cdots &amp; \cdots\\
+\end{bmatrix}}\right\}64$
+$+$
+$\underbrace{
+\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}_{\displaystyle 30-bias}
+\left.\vphantom{\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}\right\}1$
+$=$
+$\underbrace{
+\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}_{\displaystyle 30-preds}
+\left.\vphantom{\begin{bmatrix}
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\cdots &amp; \cdots &amp; \cdots &amp; \cdots\\
+\end{bmatrix}}\right\}128-bs$</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="RNN-Number-2">
+<a class="anchor" href="#RNN-Number-2" aria-hidden="true"><span class="octicon octicon-link"></span></a>RNN Number 2<a class="anchor-link" href="#RNN-Number-2"> </a>
+</h3>
+<p>Now that we have a simple model, how do we improve it?  There are many steps that need to be taken to get to a cutting edge model.  We'll do one improvement, then leave the rest for future blog posts.</p>
+<p>One thing that was a bit odd is in the training loop we reset back to 0 every time.  What I mean by that, is we would loop through each of the 3 tokens, output our predictions for those, update the weights, then reset back for a new set.  This isn't really how language works.  Language has a pattern and a sequence to it.  The further back you go the less important, but even things said a couple minutes ago could be important.  Could you imagine holding a conversation if you could only remember and respond based on the last 3 words?</p>
+<p>So let's fix this problem.  We will move our h=0 up to the initialization of the class, and never reset back to 0.  Instead, we will continuously keep adding to it.  We will only update the last batch of weights (as if we updated all of them by the 1000th one we would be updating far to many weights to compute).  We call this "detaching" it.  Ultimately we are left with the same thing, but if has a memory of previous sequences beyond the one we are processing!  Let's see if it makes things better.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LM2</span><span class="p">(</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vocab_sz</span><span class="p">,</span> <span class="n">n_hidden</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">i_h</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">vocab_sz</span><span class="p">,</span> <span class="n">n_hidden</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h_h</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">n_hidden</span><span class="p">,</span> <span class="n">n_hidden</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h_o</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">n_hidden</span><span class="p">,</span><span class="n">vocab_sz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">i_h</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="n">i</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h_h</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">))</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_o</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To do this we need to take care that our data is in the appropriate order, so let's do a few tranformations to make that work.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">seqs</span><span class="p">)</span><span class="o">//</span><span class="n">bs</span>
+<span class="n">m</span><span class="p">,</span><span class="n">bs</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">seqs</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">group_chunks</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">bs</span><span class="p">):</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span> <span class="o">//</span> <span class="n">bs</span>
+    <span class="n">new_ds</span> <span class="o">=</span> <span class="n">L</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span> <span class="n">new_ds</span> <span class="o">+=</span> <span class="n">L</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">m</span><span class="o">*</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">bs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">new_ds</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cut</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seqs</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">)</span>
+<span class="n">dls</span> <span class="o">=</span> <span class="n">DataLoaders</span><span class="o">.</span><span class="n">from_dsets</span><span class="p">(</span>
+    <span class="n">group_chunks</span><span class="p">(</span><span class="n">seqs</span><span class="p">[:</span><span class="n">cut</span><span class="p">],</span> <span class="n">bs</span><span class="p">),</span> 
+    <span class="n">group_chunks</span><span class="p">(</span><span class="n">seqs</span><span class="p">[</span><span class="n">cut</span><span class="p">:],</span> <span class="n">bs</span><span class="p">),</span> 
+    <span class="n">bs</span><span class="o">=</span><span class="n">bs</span><span class="p">,</span> <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">learn</span> <span class="o">=</span> <span class="n">Learner</span><span class="p">(</span><span class="n">dls</span><span class="p">,</span> <span class="n">LM2</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vocab</span><span class="p">),</span> <span class="mi">64</span><span class="p">),</span> <span class="n">loss_func</span><span class="o">=</span><span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="n">accuracy</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">learn</span><span class="o">.</span><span class="n">fit_one_cycle</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">3e-3</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th>epoch</th>
+      <th>train_loss</th>
+      <th>valid_loss</th>
+      <th>accuracy</th>
+      <th>time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>2.342321</td>
+      <td>1.897249</td>
+      <td>0.481689</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>1.453624</td>
+      <td>1.713581</td>
+      <td>0.449707</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>1.154838</td>
+      <td>1.680148</td>
+      <td>0.519775</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>1.042766</td>
+      <td>1.566625</td>
+      <td>0.517822</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0.969852</td>
+      <td>1.633654</td>
+      <td>0.542480</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>0.937066</td>
+      <td>1.581196</td>
+      <td>0.559570</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>0.882712</td>
+      <td>1.660810</td>
+      <td>0.588379</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>0.844926</td>
+      <td>1.595611</td>
+      <td>0.597656</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>0.808309</td>
+      <td>1.613600</td>
+      <td>0.605225</td>
+      <td>00:00</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>0.797358</td>
+      <td>1.621867</td>
+      <td>0.605713</td>
+      <td>00:00</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>And we are up from about 50% accuracy to about 60%!</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Conclusion">
+<a class="anchor" href="#Conclusion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusion<a class="anchor-link" href="#Conclusion"> </a>
+</h1>
+<p>Hopefully from this post you gained an understanding of the fundamental concepts behind NLP using Neural Networks.  While this isn't cutting edge, the fundamental principles must be understood if you want to gain an intuition about what types of things might work.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="Isaac-Flath/fastblog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/fastblog/neural%20networks/2020/08/22/RNN_Foundations.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/fastblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/fastblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/fastblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>An easy to use blogging platform with support for Jupyter Notebooks.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/fastai" title="fastai"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/fastdotai" title="fastdotai"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
