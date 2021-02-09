@@ -1,0 +1,1 @@
+Sitemap: https://isaac-flath.github.io/fastblog/sitemap.xml
