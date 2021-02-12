@@ -633,7 +633,7 @@ window.onload = wrap_img;
 <h1 id="Soft-Label-Callback">
 <a class="anchor" href="#Soft-Label-Callback" aria-hidden="true"><span class="octicon octicon-link"></span></a>Soft Label Callback<a class="anchor-link" href="#Soft-Label-Callback"> </a>
 </h1>
-<p>Now, I write a callback to grab the one-hot encoded labels instead of the encoded column in our training loop.  Thiswon't do anything until we have our distiilled labels, but I will set the model up this way now so I don't have to modify anything later</p>
+<p>Now, I write a callback to grab the one-hot encoded labels instead of the encoded column in our training loop.  This won't do anything until we have our distiilled labels, but I will set the model up this way now so I don't have to modify anything later</p>
 
 </div>
 </div>
@@ -672,7 +672,7 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>When I train I will be doing folds to generate new labels for the training set for knowledge distillation.  I might as well set up inference and make predictions for each of the folds.  I'm also adding 8fold TTA - it's no effort for me to do it in fastai (<code>learn.get_preds</code> vs <code>learn.tta</code>.)</p>
+<p>When I train I will be doing folds to generate new labels for the training set for knowledge distillation.  I might as well set up inference and make predictions for each of the folds.  I'm also adding 4 fold TTA - it's no effort for me to do it in fastai (<code>learn.get_preds</code> vs <code>learn.tta</code>.)</p>
 
 </div>
 </div>
@@ -832,7 +832,7 @@ I am also not going to do early stopping like in the winning solution.  If the m
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Great!  So that got us to third place with the best model already!  Here's the fold scores.  Our second place model as well as an average of all 5 fold predictions were both also in the top 10.  We successfully got into the top 10 already with 3 submissions.  It is also helpful to note that the most reasonable 2 models to pick would be the average of all 5 fold predictions as well as the 3rd place submission based on the public leaderboard (as when choosing which to use in an active competition you wouldn't be able to see the private leaderboard score).  Mission accomplished!</p>
 <p>First place in the competition had a Private Leaderboard score of 0.98445 with 10th place had 0.97883 for reference.</p>
-<p>So As you can see, fastai is plenty capable to compete on the cutting edge at the top of kaggle competitions.</p>
+<p>As you can see, fastai is plenty capable to compete on the cutting edge at the top of kaggle competitions.</p>
 <p><img src="/fastblog/images/copied_from_nb/my_icons/First5Fold.png" alt=""></p>
 
 </div>
