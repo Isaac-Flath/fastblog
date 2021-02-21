@@ -344,11 +344,11 @@ weight * noise + image (ouput):   torch.Size([32, 512, 4, 4])
 <p>To recap what we have so far:</p>
 <ul>
 <li>An image that has random noise injected into it from the Noise Injection Step</li>
-<li>A transformed noise matrix from out mapping network <code>w</code>
+<li>A transformed noise matrix from our mapping network <code>w</code>
 </li>
 </ul>
 <p>We need to combine these and we need some sort of normalization.  That is what this Adaptive Instance normalization is going to do.  Just like the noise injection happens in many places in the network.</p>
-<p>As previously mentioned, injecting <code>w</code> rather than just normally distributed noise gives us more control over the images generated.  We are going to take out image after normalization, multiply it by a <code>scale</code> from the weight matrix and add a <code>shift</code> also from the weight matrix. Put another way, another linear layer.  So in summary what we need to do is:</p>
+<p>As previously mentioned, injecting <code>w</code> rather than just normally distributed noise gives us more control over the images generated.  We are going to take our image after normalization, multiply it by a <code>scale</code> from the weight matrix and add a <code>shift</code> also from the weight matrix. Put another way, another linear layer.  So in summary what we need to do is:</p>
 <ol>
 <li>Normalize the image</li>
 <li>Use a linear layer to map <code>w</code> to 1 value per channel to give us a <code>scale</code> tensor</li>
