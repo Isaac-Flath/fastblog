@@ -150,9 +150,9 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>This post is inspired by <a href="https://twitter.com/TheZachMueller">Zach Mueller's</a> blog on <a href="https://muellerzr.github.io/fastblog/2021/02/14/Pytorchtofastai.html">Pytorch to Fastai, Bridging the Gap</a>.  I read that post and thought it was a fantastic illustration of how you can switch out components of fastai with pytorch as needed so you can do low level customization anytime you want.</p>
-<p>Often a complaint about fastai is "I need access to the training loop and fastai doesn't allow this".  I am writing this post to expand on Zach's work and show that that statement is just not true.  His post demonstrated how to use pytorch components in a fastai training loop seamlessly.  This post is going to demonstrate the inverse is also just as easy.  Said another way, this post will demonstrate creating a fastai learner (without any pytorch) and then put that in a pure pytorch training loop.</p>
-<p>Of course, most of the time you would use callbacks to modify the training loop.  But this isn't a fastai requirement and fastai doesn't force you to do so.  There may be some instances where that's not desirable.  For example I was working in CycleGAN has 2 generators and 2 discriminators.  While you could find a way to use callbacks to make that work in the fastai training loop, I found it easier to just have a custom pytorch training loop.  As with every other piece of fastai, switching the fastai bits out for pytorch is seamless so that's no problem.</p>
+<p>This post is inspired by <a href="https://twitter.com/TheZachMueller">Zach Mueller's</a> blog on <a href="https://muellerzr.github.io/fastblog/2021/02/14/Pytorchtofastai.html">Pytorch to Fastai, Bridging the Gap</a>.  I read that post and thought it was a fantastic illustration of how you can switch out components of fastai with pytorch as needed so you can do low level customization anytime you want.  I am writing this post to expand on Zach's work.</p>
+<p>Often a complaint about fastai is "I need access to the training loop and fastai doesn't allow this".   I want to show that that statement is just not true.  Zach's post demonstrated how to use pytorch components in a fastai training loop seamlessly.  This post is going to demonstrate the inverse is also just as easy.  Said another way, this post will demonstrate creating a fastai learner (without any pytorch) and then using that in a pure pytorch training loop.</p>
+<p>Of course, most of the time you would use callbacks to modify the training loop.  But this isn't a fastai requirement and fastai doesn't force you to do so.  There may be some instances where that's not desirable.  For example, I was working with CycleGAN models which has 2 generators and 2 discriminators.  While you could find a way to use callbacks to make that work in the fastai training loop, I found it easier to just have a custom pytorch training loop.  As with every other piece of fastai, switching the fastai bits out for pytorch is seamless so that's no problem.</p>
 
 </div>
 </div>
@@ -180,7 +180,7 @@ window.onload = wrap_img;
 <h1 id="Create-the-Fastai-Learner">
 <a class="anchor" href="#Create-the-Fastai-Learner" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create the Fastai Learner<a class="anchor-link" href="#Create-the-Fastai-Learner"> </a>
 </h1>
-<p>This will create everything needed for a model.  The scheduler/optimizer/loss function isn't specified so we are using fastai's defaults.  Of course, you can specify them with fastai components, or reference <a href="https://muellerzr.github.io/fastblog/2021/02/14/Pytorchtofastai.html">Zach's blog</a> to switch any of these pieces out with pytorch.</p>
+<p>This will create everything needed for a model.  The scheduler/optimizer/loss function isn't specified so we are using fastai's defaults.  Of course, you can specify them with fastai components, or reference <a href="https://muellerzr.github.io/fastblog/2021/02/14/Pytorchtofastai.html">Zach's blog</a> to learn how to switch any of these pieces out with pytorch.</p>
 
 </div>
 </div>
@@ -349,7 +349,7 @@ window.onload = wrap_img;
 <a class="anchor" href="#Conclusion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusion<a class="anchor-link" href="#Conclusion"> </a>
 </h1>
 <p>So really if you need to something custom pure pytorch thing in fastai you can.  It really doesn't matter if that custom thing is in the training loop, dataloaders, optimizers, loss function, or something else - it all integrates with pytorch seamlessly.</p>
-<p>Now, for most things I reccomend getting comfortable and using the powerful fastai callback system.  But in situations when you need or want pytorch - go for it!  Fastai let's you do this seamlessly as demonstrated above.</p>
+<p>Now, for most things I reccomend getting comfortable and using the powerful fastai callback system.  But in situations when you need or want pytorch - go for it!</p>
 
 </div>
 </div>
