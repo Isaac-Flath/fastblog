@@ -180,7 +180,7 @@ window.onload = wrap_img;
 <h1 id="Create-the-Fastai-Learner">
 <a class="anchor" href="#Create-the-Fastai-Learner" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create the Fastai Learner<a class="anchor-link" href="#Create-the-Fastai-Learner"> </a>
 </h1>
-<p>This will create everything needed for a model.  The scheduler/optimizer/loss function isn't specified so we are using fastai's defaults.  Of course, you can specify them with fastai components, or reference <a href="https://muellerzr.github.io/fastblog/2021/02/14/Pytorchtofastai.html">Zach's blog</a> to learn how to switch any of these pieces out with pytorch.</p>
+<p>This section will create everything needed to train a model model.  First, we start with the dataloaders.</p>
 
 </div>
 </div>
@@ -239,7 +239,13 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Create the fastai learner.  The optimizer, loss function, scheduler, are all being created by fastai using fastai defaults.  We'll use all of that fastai goodness in the pytorch training loop.</p>
+<p>Next, we ceate the fastai learner.</p>
+<p>You may notice I am not specifying a scheduler, optimizer, or loss function.  Because of that it will use fastai's defaults.    We'll use all of that fastai goodness in the pytorch training loop.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>Of course, you can specify any of these components more explicitly using fastai.  Or you can swap them out for pure pytorch components as demonstrated in <a href="https://muellerzr.github.io/fastblog/2021/02/14/Pytorchtofastai.html">Zach’s blog post</a>. 
+</div>
 
 </div>
 </div>
@@ -267,11 +273,21 @@ window.onload = wrap_img;
 <h1 id="Training">
 <a class="anchor" href="#Training" aria-hidden="true"><span class="octicon octicon-link"></span></a>Training<a class="anchor-link" href="#Training"> </a>
 </h1>
-<p>Great, we've got all we need to train a model using fastai.  So let's replace the fastai training loop with pytorch.  This code follows extrememly closely to the training loop in the <a href="https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html">pytorch tutorial</a>.  For more details on it check there.  Naturally you can add anything custom here just as you would in pytorch.</p>
-<p>For example, <code>learn.opt</code> is the optimizer in the fastai learner.  <code>learn.loss_func</code> is the loss function in the fastai learner.  <code>learn.model</code> is the model in the fastai learner.  All that was defined by fastai above.
+<p>Great!  We've got all we need to train a model using fastai, but let's do it in pytorch instead.  This code follows the the training loop in the <a href="https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html">pytorch tutorial</a>.  For more details check out that tutorial.  Naturally, you can add anything custom here just as you would in pytorch (because what you see below is pytorch).</p>
+<ul>
+<li>
+<code>learn.dls.train</code> is the fastai train dataloader we defined above.</li>
+<li>
+<code>learn.opt</code> is the optimizer in the fastai learner.</li>
+<li>
+<code>learn.loss_func</code> is the loss function in the fastai learner.</li>
+<li>
+<code>learn.model</code> is the model in the fastai learner.  </li>
+</ul>
+<p>All that was defined by fastai above and we can simply call them directly in a pytorch training loop.
 </p>
 <div class="flash">
-    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
     <strong>Note: </strong>To use the fastai training loop you would do use something like <code>learn.fine_tune</code> or <code>learn.fit_one_cycle</code>.  This is doing a pytorch training loop instead.
 </div>
 
@@ -348,8 +364,8 @@ window.onload = wrap_img;
 <h1 id="Conclusion">
 <a class="anchor" href="#Conclusion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusion<a class="anchor-link" href="#Conclusion"> </a>
 </h1>
-<p>So really if you need to something custom pure pytorch thing in fastai you can.  It really doesn't matter if that custom thing is in the training loop, dataloaders, optimizers, loss function, or something else - it all integrates with pytorch seamlessly.</p>
-<p>Now, for most things I reccomend getting comfortable and using the powerful fastai callback system.  But in situations when you need or want pytorch - go for it!</p>
+<p>If you need to something custom pure pytorch thing in fastai you can.  It really doesn't matter if that custom thing is in the training loop, dataloaders, optimizers, loss function, or something else - it all integrates with pytorch seamlessly.</p>
+<p>For most things I reccomend getting comfortable and using the powerful fastai callback system.  But in situations when you need or want pytorch - go for it!</p>
 
 </div>
 </div>
