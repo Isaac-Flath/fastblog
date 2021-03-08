@@ -142,7 +142,7 @@ window.onload = wrap_img;
 <li class="toc-entry toc-h1"><a href="#Dataset">Dataset </a></li>
 <li class="toc-entry toc-h1"><a href="#Models">Models </a>
 <ul>
-<li class="toc-entry toc-h2"><a href="#Discriminator">Discriminator </a></li>
+<li class="toc-entry toc-h2"><a href="#Discriminator---Key-1">Discriminator - Key 1 </a></li>
 <li class="toc-entry toc-h2"><a href="#Generator">Generator </a>
 <ul>
 <li class="toc-entry toc-h3"><a href="#Initial-Layer">Initial Layer </a></li>
@@ -157,7 +157,7 @@ window.onload = wrap_img;
 <li class="toc-entry toc-h1"><a href="#Loss-Functions">Loss Functions </a>
 <ul>
 <li class="toc-entry toc-h2"><a href="#Discriminator-Loss">Discriminator Loss </a></li>
-<li class="toc-entry toc-h2"><a href="#Generator-Loss---The-Key">Generator Loss - The Key </a></li>
+<li class="toc-entry toc-h2"><a href="#Generator-Loss---Key-2">Generator Loss - Key 2 </a></li>
 </ul>
 </li>
 <li class="toc-entry toc-h1"><a href="#Conclusion">Conclusion </a></li>
@@ -176,10 +176,11 @@ window.onload = wrap_img;
 <p>In this post I will build on my previous posts on GANs and talk about CycleGAN.</p>
 <p>In StyleGAN, we took noise generated an image realistic enough to fool the discriminator.  In CycleGAN we take an image and modify it to a different class to make that modified image realistic enough to fool the discriminator into believing it's that class.</p>
 <p>I am going to walk through a great <a href="https://github.com/aitorzip/PyTorch-CycleGAN">Pytorch CycleGAN implementation</a> and explain what the pieces are doing in plain english so anyone can understand the important bits without diving through lots of code or reading an academic paper.</p>
-<p>Before we jump in - here's the two most important pieces to CycleGAN that we'll be diving into.</p>
+<p>Before we jump in - here's the three most important pieces to CycleGAN to understand if you want to skip to the most crucial bits.  I labeled the key sections in the Table of Contents for you.</p>
 <ol>
 <li>There are 2 generators and 2 discriminators being trained.  4 total models!</li>
-<li>The loss function adds a special component which adds the full cycle to the loss function (ie Horse -&gt; generator -&gt; Zebra -&gt; generator -&gt; Horse -&gt; How close is this generated horse to starting horse)</li>
+<li>The Generator Loss function has 3 components: Adverserial Loss, Cycle Loss, and Identity loss.  Understanding these is key.</li>
+<li>The Discriminator predicts real or fake for lots of different chunks of the image, not just 1 prediction for the whole image.</li>
 </ol>
 <p>These will be explained in detail as we go so don't worry if that doesn't completely make sense just yet.  It will :)</p>
 <p>So let's get started!</p>
@@ -346,6 +347,7 @@ window.onload = wrap_img;
 <h1 id="Models">
 <a class="anchor" href="#Models" aria-hidden="true"><span class="octicon octicon-link"></span></a>Models<a class="anchor-link" href="#Models"> </a>
 </h1>
+<p>We have discriminators and generators - let's look briefly at what they output, then dive into some details.</p>
 <ul>
 <li>The discriminator outputs a bunch of predictions as to whether different portions of an image is a real image of that class or a fake image of that class</li>
 <li>The generator is taking a real image and converting it to the other class.  For example a picture of a lake in the Summer goes in and a picture of that same lake in the winter should come out (maybe adding snow for example).</li>
@@ -357,8 +359,8 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Discriminator">
-<a class="anchor" href="#Discriminator" aria-hidden="true"><span class="octicon octicon-link"></span></a>Discriminator<a class="anchor-link" href="#Discriminator"> </a>
+<h2 id="Discriminator---Key-1">
+<a class="anchor" href="#Discriminator---Key-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Discriminator - Key 1<a class="anchor-link" href="#Discriminator---Key-1"> </a>
 </h2>
 <p>The most important thing to understand about any model is what it's predicting.  Let's take a look at the last thing that is done before it's output and understand that first.</p>
 <ul>
@@ -384,7 +386,7 @@ window.onload = wrap_img;
 <strong>InstanceNorm2d:</strong> BatchNorm is more common, but this is just a small tweak from that.  If you think about the different meanings of the word "Instance" vs "Batch" you make be able to guess what the difference is.  In short BatchNorm is normalizing across the entire batch (computing 1 mean/std).  InstanceNorm is normalizing over the individual image (instance), so you have a mean and std for each image.
 <div class="flash">
     <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
-    <strong>Note: </strong>If you think through the impact of batch vs Instance normalization you may realize that with BatchNorm the training for a particular image is effected by which images happen to be in the same batch.  This is becuase the mean and standard deviation are calculated across the entire batch, rather than for that image alone.
+    <strong>Note: </strong>If you think through the impact of batch vs Instance normalization you may realize that with BatchNorm the training for a particular image is effected by which images happen to be in the same batch.  This is because the mean and standard deviation are calculated across the entire batch, rather than for that image alone.
 </div>
 </li>
 </ul>
@@ -798,8 +800,8 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Generator-Loss---The-Key">
-<a class="anchor" href="#Generator-Loss---The-Key" aria-hidden="true"><span class="octicon octicon-link"></span></a>Generator Loss - The Key<a class="anchor-link" href="#Generator-Loss---The-Key"> </a>
+<h2 id="Generator-Loss---Key-2">
+<a class="anchor" href="#Generator-Loss---Key-2" aria-hidden="true"><span class="octicon octicon-link"></span></a>Generator Loss - Key 2<a class="anchor-link" href="#Generator-Loss---Key-2"> </a>
 </h2>
 <p>The generator loss is the key to CycleGAN and it has three main parts to it.</p>
 <ol>
