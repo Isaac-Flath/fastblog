@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>StyleGAN Components | Isaac’s Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="StyleGAN Components" />
+<meta name="author" content="Isaac Flath" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Showing the key components to StyleGAN and how they work" />
+<meta property="og:description" content="Showing the key components to StyleGAN and how they work" />
+<link rel="canonical" href="https://isaac-flath.github.io/fastblog/computer%20vision/gan/2021/03/01/StyleGanComponents.html" />
+<meta property="og:url" content="https://isaac-flath.github.io/fastblog/computer%20vision/gan/2021/03/01/StyleGanComponents.html" />
+<meta property="og:site_name" content="Isaac’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-03-01T00:00:00-06:00" />
+<script type="application/ld+json">
+{"url":"https://isaac-flath.github.io/fastblog/computer%20vision/gan/2021/03/01/StyleGanComponents.html","@type":"BlogPosting","headline":"StyleGAN Components","dateModified":"2021-03-01T00:00:00-06:00","datePublished":"2021-03-01T00:00:00-06:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://isaac-flath.github.io/fastblog/computer%20vision/gan/2021/03/01/StyleGanComponents.html"},"author":{"@type":"Person","name":"Isaac Flath"},"description":"Showing the key components to StyleGAN and how they work","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/fastblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://isaac-flath.github.io/fastblog/feed.xml" title="Isaac's Blog" /><link rel="shortcut icon" type="image/x-icon" href="/fastblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/fastblog/">Isaac&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/fastblog/about/">About Me</a><a class="page-link" href="/fastblog/search/">Search</a><a class="page-link" href="/fastblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">StyleGAN Components</h1><p class="page-description">Showing the key components to StyleGAN and how they work</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-03-01T00:00:00-06:00" itemprop="datePublished">
+        Mar 1, 2021
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Isaac Flath</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      9 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Computer Vision">Computer Vision</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/fastblog/categories/#GAN">GAN</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/Isaac-Flath/fastblog/tree/master/_notebooks/2021-03-01-StyleGanComponents.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/fastblog/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/Isaac-Flath/fastblog/master?filepath=_notebooks%2F2021-03-01-StyleGanComponents.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/Isaac-Flath/fastblog/blob/master/_notebooks/2021-03-01-StyleGanComponents.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Intro">Intro </a></li>
+<li class="toc-entry toc-h1"><a href="#Truncated-Noise">Truncated Noise </a></li>
+<li class="toc-entry toc-h1"><a href="#Noise-to-Weight-Mapping">Noise to Weight Mapping </a></li>
+<li class="toc-entry toc-h1"><a href="#Noise-Injection">Noise Injection </a></li>
+<li class="toc-entry toc-h1"><a href="#Adaptive-Instance-Normalization-(AdaIN)">Adaptive Instance Normalization (AdaIN) </a></li>
+<li class="toc-entry toc-h1"><a href="#Progressive-Growing">Progressive Growing </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2021-03-01-StyleGanComponents.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Intro">
+<a class="anchor" href="#Intro" aria-hidden="true"><span class="octicon octicon-link"></span></a>Intro<a class="anchor-link" href="#Intro"> </a>
+</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In this post I will cover several components needed for style GAN and build a basic one using those blocks.  I am not going to train it, or try to make a state of the art one.  Things will be simplified to the simplest form possible to understand the concept.  If you want to understand some of the key techniques used in modern SoTA GANs, this is the post for you!</p>
+<p>A future post will be actually building a real StyleGAN model to produce high def images to show practical GANs in full size networks to create actual images.  Reading this post first is highly recommended!</p>
+<p>Inspiration for this post came from the deeplearning.ai GAN specialization.  For more complete information on GANs in a structured course, check that course out!</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Truncated-Noise">
+<a class="anchor" href="#Truncated-Noise" aria-hidden="true"><span class="octicon octicon-link"></span></a>Truncated Noise<a class="anchor-link" href="#Truncated-Noise"> </a>
+</h1>
+<p>The first is an easy one to get us warmed up!  This is not something used during training, but rather a technique you can use after training to control the diversity-quality trade-off when you generate images.</p>
+<p>Generators work by taking in random noise.  The random noise can be thought of a a random seed that the generators create images from.  Normally we sample from the normal distribution.  If you look at the normal distribution graph below you will realize that some values will be selected a lot, while others will be selected pretty rarely.  If a value is in the tail, it will be selected much less frequently than a value close to the mean.  So what does that mean?  It means that for those particular values there will have been fewer examples to train with and will thus probably will result in lower quality images.</p>
+<p>In order to deal with this issue we can truncate the normal distribution to sample from only the higher frequency areas.  The reason this is a trade-off is because if we have fewer possible values (starting points), that mean means fewer possible images can be generated.  In other words we will have less diverse outputs.</p>
+<p><strong>So the key things to know are</strong>:</p>
+<ul>
+<li>Truncated Normal Distribution just cuts off values on each each based on some set parameter</li>
+<li>Left graph shows normal distribution - right graphs show different levels of truncation</li>
+<li>There is a diversity/quality trade-off that this technique allows you to make</li>
+<li>Graphs are most diversity in output images to least diversity from left to right</li>
+<li>Graphs are lowest quality images to highest quality images from left to right</li>
+</ul>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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%0A">
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Noise-to-Weight-Mapping">
+<a class="anchor" href="#Noise-to-Weight-Mapping" aria-hidden="true"><span class="octicon octicon-link"></span></a>Noise to Weight Mapping<a class="anchor-link" href="#Noise-to-Weight-Mapping"> </a>
+</h1>
+<p>The next component is a noise to weight mapping.  A generator gets a noise vector of random values from the normal distribution.  This may be problematic.  Not all of our features will follow the normal distribution - so trying to map normal distribution values to various features that follow other distributions gets messy.</p>
+<p>This is especially problematic because we want to be able to independently control features in the output image.  I don't want to modify the direction the eyes are looking and have that also change facial features.  I want to be able to tweak components without having a tangled mess of mappings.</p>
+<p>To fix this we learn the distributions that are ideal for the noise vector.  So random noise comes in, it gets passed through a Mapping Network and we end with a weight matrix <code>w</code>.  Since a neural network can approximate any function, that means it can approximate any distribution so this should work.  This lets your model learn represent things in a cleaner way and makes your mapping much less tangled so you can control features much easier.</p>
+<p>The mapping network in StyleGAN is composed of 8 layers - but here's a simplified version just to get the idea that it's just a normal neural network that is mapping the noise vector (z) to the weights vector (w).</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">MappingNetwork</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">w_dim</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">z_dim</span><span class="p">,</span>      <span class="n">hidden_dim</span><span class="p">),</span>  <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">),</span>  <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">w_dim</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">noise</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapping</span><span class="p">(</span><span class="n">noise</span><span class="p">)</span>
+    
+<span class="n">MappingNetwork</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">200</span><span class="p">,</span><span class="mi">75</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>MappingNetwork(
+  (mapping): Sequential(
+    (0): Linear(in_features=100, out_features=200, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=200, out_features=200, bias=True)
+    (3): ReLU()
+    (4): Linear(in_features=200, out_features=75, bias=True)
+  )
+)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Noise-Injection">
+<a class="anchor" href="#Noise-Injection" aria-hidden="true"><span class="octicon octicon-link"></span></a>Noise Injection<a class="anchor-link" href="#Noise-Injection"> </a>
+</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Next, we need a process for injecting random noise in various parts of the network.  This is different than the weight vector we created above.  We inject this additional noise to increase diversity.  The way this works:</p>
+<ol>
+<li>Create 1 weight for each channel (learned)</li>
+<li>Create a noise tensor of random numbers the same size as your image, but with only 1 channel (random)</li>
+<li>Multiply noise tensor by each of those values so you end with something same dimension as image and add this to the image</li>
+</ol>
+<p>That outputs the new image that includes the noise can continue down the network.  Nothing special needs to happen other than this because we didn't change any dimensions.  Really it's just a linear layer with random noise in it.  You can see below that then image shape and the final shape are identical.</p>
+<p>This happens in many places in the network before every AdaIN layer.  So let's see what the AdaIN layer is.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">InjectNoise</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">channels</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
+        <span class="n">noise_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">,</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> 
+        <span class="n">noise</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">noise_shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">image</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">*</span> <span class="n">noise</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Image (input)                     </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Weight (step 1):                  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Noise (step 2):                   </span><span class="si">{</span><span class="n">noise</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'weight * noise + image (ouput):   </span><span class="si">{</span><span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+<span class="n">tmp</span> <span class="o">=</span> <span class="n">InjectNoise</span><span class="p">(</span><span class="mi">512</span><span class="p">)(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span><span class="mi">512</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Image (input)                     torch.Size([32, 512, 4, 4])
+Weight (step 1):                  torch.Size([1, 512, 1, 1])
+Noise (step 2):                   torch.Size([32, 1, 4, 4])
+weight * noise + image (ouput):   torch.Size([32, 512, 4, 4])
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Adaptive-Instance-Normalization-(AdaIN)">
+<a class="anchor" href="#Adaptive-Instance-Normalization-(AdaIN)" aria-hidden="true"><span class="octicon octicon-link"></span></a>Adaptive Instance Normalization (AdaIN)<a class="anchor-link" href="#Adaptive-Instance-Normalization-(AdaIN)"> </a>
+</h1>
+<p>To recap what we have so far:</p>
+<ul>
+<li>An image that has random noise injected into it from the Noise Injection Step</li>
+<li>A transformed noise matrix from our mapping network <code>w</code>
+</li>
+</ul>
+<p>We need to combine these and we need some sort of normalization.  That is what this Adaptive Instance normalization is going to do.  Just like the noise injection happens in many places in the network.</p>
+<p>As previously mentioned, injecting <code>w</code> rather than just normally distributed noise gives us more control over the images generated.  We are going to take our image after normalization, multiply it by a <code>scale</code> from the weight matrix and add a <code>shift</code> also from the weight matrix. Put another way, another linear layer.  So in summary what we need to do is:</p>
+<ol>
+<li>Normalize the image</li>
+<li>Use a linear layer to map <code>w</code> to 1 value per channel to give us a <code>scale</code> tensor</li>
+<li>Use a linear layer to map <code>w</code> to 1 value per channel to give us a <code>shift</code> tensor</li>
+<li>output <code>style_tensor * normalized_image  + shift_tensor</code>
+</li>
+</ol>
+<p>Take a look below at some the code for what it does and the shapes to understand the inputs and outputs.  Input and output size is the same, but with normalization and injected weight tensor!</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">AdaIN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">w_dim</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_norm</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">InstanceNorm2d</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_transform</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">w_dim</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shift_transform</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">w_dim</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+        <span class="n">normalized_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_norm</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+        <span class="n">scale_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_transform</span><span class="p">(</span><span class="n">w</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">shift_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift_transform</span><span class="p">(</span><span class="n">w</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">transformed_image</span> <span class="o">=</span> <span class="n">scale_tensor</span> <span class="o">*</span> <span class="n">normalized_image</span> <span class="o">+</span> <span class="n">shift_tensor</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Image (input)                       </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'normalized_image (step 1)           </span><span class="si">{</span><span class="n">normalized_image</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'w (input)                           </span><span class="si">{</span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'scale (step 2):                     </span><span class="si">{</span><span class="n">scale_tensor</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'shift (step 3):                     </span><span class="si">{</span><span class="n">shift_tensor</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'scale * norm_image + shift (ouput): </span><span class="si">{</span><span class="n">transformed_image</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">transformed_image</span>
+<span class="n">tmp</span> <span class="o">=</span> <span class="n">AdaIN</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span><span class="mi">256</span><span class="p">)(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span><span class="mi">512</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span><span class="mi">256</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Image (input)                       torch.Size([32, 512, 4, 4])
+normalized_image (step 1)           torch.Size([32, 512, 4, 4])
+w (input)                           torch.Size([32, 256])
+scale (step 2):                     torch.Size([32, 512, 1, 1])
+shift (step 3):                     torch.Size([32, 512, 1, 1])
+scale * norm_image + shift (ouput): torch.Size([32, 512, 4, 4])
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Progressive-Growing">
+<a class="anchor" href="#Progressive-Growing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Progressive Growing<a class="anchor-link" href="#Progressive-Growing"> </a>
+</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now there's one last piece we need to understand the main components of styleGAN.  Progessive growing is just what it sounds like.  The generator will create a small image and progressively grow the size.  It doubles the image in size until getting the image to the required size.  This allows for higher quality and resolution photos.</p>
+<p>Intuitively this makes sense.  It'd be much harder to generate an entire picture all at once that all meshes well together.  Instead we put basic structures and build on it slowly by filling in more and more fine details over time as the image you are generating increases in size.</p>
+<p>So let's jump into it.  Let's create a re-usable block to implement this using the other components as well.  Here's what we need:</p>
+<ol>
+<li>An upsampling layer (for progressive growing)</li>
+<li>A convolutional layer (standard for image problems)</li>
+<li>Random noise injection (we created that above)</li>
+<li>An AdaIN layer (we created that above)</li>
+<li>An activation (just like all neural networks need)</li>
+</ol>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">MinifiedStyleGANGeneratorBlock</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_chan</span><span class="p">,</span> <span class="n">out_chan</span><span class="p">,</span> <span class="n">w_dim</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">starting_size</span><span class="p">,</span> <span class="n">use_upsample</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_upsample</span> <span class="o">=</span> <span class="n">use_upsample</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_upsample</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">upsample</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Upsample</span><span class="p">((</span><span class="n">starting_size</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s1">'bilinear'</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_chan</span><span class="p">,</span> <span class="n">out_chan</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">inject_noise</span> <span class="o">=</span> <span class="n">InjectNoise</span><span class="p">(</span><span class="n">out_chan</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adain</span> <span class="o">=</span> <span class="n">AdaIN</span><span class="p">(</span><span class="n">out_chan</span><span class="p">,</span> <span class="n">w_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LeakyReLU</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_upsample</span><span class="p">:</span> <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upsample</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1"># upsample        (step 1)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>                           <span class="c1"># conv layer      (step 2)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inject_noise</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>                   <span class="c1"># noise injection (step 3)        </span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>                     <span class="c1"># activation      (step 4)     </span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adain</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>                       <span class="c1"># AdaIN           (step 5)</span>
+        <span class="k">return</span> <span class="n">x</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now, you can implement progressive growing and put it all together.  Let's see how that works in StyleGAN. As you can see we move from an 8x8 image to a 16x16 image.  StyleGAn will do this many times.</p>
+<p>Keep in mind all of this is simplified and scaled down from what is in StyleGAN.  The purpose of this blog was to communicate the core concepts and techniques used in StyleGAN, not necessarily show the practical applications.  Stay tuned for a blog that shows practical application of these concepts!</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">MinifiedStyleGANGenerator</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z_dim</span><span class="p">,</span> <span class="n">map_hidden_dim</span><span class="p">,</span> <span class="n">w_dim</span><span class="p">,</span> <span class="n">in_chan</span><span class="p">,</span> <span class="n">out_chan</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">hidden_chan</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="n">MappingNetwork</span><span class="p">(</span><span class="n">z_dim</span><span class="p">,</span> <span class="n">map_hidden_dim</span><span class="p">,</span> <span class="n">w_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sc</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_chan</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block0</span> <span class="o">=</span> <span class="n">MinifiedStyleGANGeneratorBlock</span><span class="p">(</span><span class="n">in_chan</span><span class="p">,</span> <span class="n">hidden_chan</span><span class="p">,</span> <span class="n">w_dim</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block1</span> <span class="o">=</span> <span class="n">MinifiedStyleGANGeneratorBlock</span><span class="p">(</span><span class="n">hidden_chan</span><span class="p">,</span> <span class="n">hidden_chan</span><span class="p">,</span> <span class="n">w_dim</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block2</span> <span class="o">=</span> <span class="n">MinifiedStyleGANGeneratorBlock</span><span class="p">(</span><span class="n">hidden_chan</span><span class="p">,</span> <span class="n">hidden_chan</span><span class="p">,</span> <span class="n">w_dim</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block1_to_image</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">hidden_chan</span><span class="p">,</span> <span class="n">out_chan</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block2_to_image</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">hidden_chan</span><span class="p">,</span> <span class="n">out_chan</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">upsample_to_match_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smaller_image</span><span class="p">,</span> <span class="n">bigger_image</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">smaller_image</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">bigger_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:],</span> <span class="n">mode</span><span class="o">=</span><span class="s1">'bilinear'</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">noise</span><span class="p">,</span> <span class="n">return_intermediate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">noise</span><span class="p">)</span> <span class="c1"># This is our mapping network going from noise -&gt; w</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block0</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sc</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="c1"># w from mapping network is input here</span>
+        
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="c1"># w noise from mapping network is input here also</span>
+        <span class="n">image1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block1_to_image</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ImageSize1      </span><span class="si">{</span><span class="n">image1</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        
+        <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="c1"># w noise from mapping network is input here also</span>
+        <span class="n">image2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block2_to_image</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ImageSize2      </span><span class="si">{</span><span class="n">image2</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        
+        <span class="n">x1_upsample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upsample_to_match_size</span><span class="p">(</span><span class="n">image1</span><span class="p">,</span> <span class="n">image2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="p">(</span><span class="n">image2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.8</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1_upsample</span><span class="p">)</span>  
+      
+<span class="n">tmp</span> <span class="o">=</span> <span class="n">MinifiedStyleGANGenerator</span><span class="p">(</span><span class="n">z_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">map_hidden_dim</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span><span class="n">w_dim</span><span class="o">=</span><span class="mi">496</span><span class="p">,</span><span class="n">in_chan</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span><span class="n">out_chan</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">hidden_chan</span><span class="o">=</span><span class="mi">256</span><span class="p">)(</span><span class="n">get_truncated_noise</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>ImageSize1      torch.Size([10, 3, 8, 8])
+ImageSize2      torch.Size([10, 3, 16, 16])
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="Isaac-Flath/fastblog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/fastblog/computer%20vision/gan/2021/03/01/StyleGanComponents.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/fastblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/fastblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/fastblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>A personal blog of technical topics relating the machine learning</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://twitter.com/isaac_flath" title="isaac_flath"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

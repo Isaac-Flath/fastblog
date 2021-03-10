@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Neural Networks and XOR | Isaac’s Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Neural Networks and XOR" />
+<meta name="author" content="Isaac Flath" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Fitting a neural Network to the XOR function" />
+<meta property="og:description" content="Fitting a neural Network to the XOR function" />
+<link rel="canonical" href="https://isaac-flath.github.io/fastblog/neural%20networks/foundations/2021/01/09/NeuralNetworksXOR.html" />
+<meta property="og:url" content="https://isaac-flath.github.io/fastblog/neural%20networks/foundations/2021/01/09/NeuralNetworksXOR.html" />
+<meta property="og:site_name" content="Isaac’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-09T00:00:00-06:00" />
+<script type="application/ld+json">
+{"url":"https://isaac-flath.github.io/fastblog/neural%20networks/foundations/2021/01/09/NeuralNetworksXOR.html","@type":"BlogPosting","headline":"Neural Networks and XOR","dateModified":"2021-01-09T00:00:00-06:00","datePublished":"2021-01-09T00:00:00-06:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://isaac-flath.github.io/fastblog/neural%20networks/foundations/2021/01/09/NeuralNetworksXOR.html"},"author":{"@type":"Person","name":"Isaac Flath"},"description":"Fitting a neural Network to the XOR function","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/fastblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://isaac-flath.github.io/fastblog/feed.xml" title="Isaac's Blog" /><link rel="shortcut icon" type="image/x-icon" href="/fastblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/fastblog/">Isaac&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/fastblog/about/">About Me</a><a class="page-link" href="/fastblog/search/">Search</a><a class="page-link" href="/fastblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Neural Networks and XOR</h1><p class="page-description">Fitting a neural Network to the XOR function</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-01-09T00:00:00-06:00" itemprop="datePublished">
+        Jan 9, 2021
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Isaac Flath</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      4 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Neural Networks">Neural Networks</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Foundations">Foundations</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/Isaac-Flath/fastblog/tree/master/_notebooks/2021-01-09-NeuralNetworksXOR.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/fastblog/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/Isaac-Flath/fastblog/master?filepath=_notebooks%2F2021-01-09-NeuralNetworksXOR.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/Isaac-Flath/fastblog/blob/master/_notebooks/2021-01-09-NeuralNetworksXOR.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Credit">Credit </a></li>
+<li class="toc-entry toc-h1"><a href="#The-Problem">The Problem </a></li>
+<li class="toc-entry toc-h1"><a href="#Neural-Network-Feature-Space">Neural Network Feature Space </a></li>
+<li class="toc-entry toc-h1"><a href="#Model-Predictions">Model Predictions </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2021-01-09-NeuralNetworksXOR.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This article is not an applied post like I usually write, but is more diving into why Neural Networks are so powerful.  The goal is to show an example of a problem that a Neural Network can solve easily that stricly linear models cannot solve.  We will do this in the simplest example, the XOR.</p>
+<p>I will cover what an XOR is in this article, so there aren't any prerequisites for reading this article.  Though if this is your first time hearing of the XOR, you may not understand the implications or the importance of solving the XOR.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Credit">
+<a class="anchor" href="#Credit" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credit<a class="anchor-link" href="#Credit"> </a>
+</h1>
+<p>I got the idea to write a post on this from reading the deep learning book.  The information covered in this post is also in that book, though the book covers more information and goes into more detail.  The primary benefit of this post over the book is that this post is in 'python pytorch' notation where the book covers this material in 'math' notation.  If this post is interesting to you, I would recommend checking out the book.</p>
+<p><strong>The book can be found with this information:</strong></p>
+<ul>
+<li>Title: Deep Learning</li>
+<li>Author: Ian Goodfellow and Yoshua Bengio and Aaron Courville</li>
+<li>Publisher: MIT Press</li>
+<li>URL: <a href="http://www.deeplearningbook.org">http://www.deeplearningbook.org</a>,</li>
+<li>Year: 2016</li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="The-Problem">
+<a class="anchor" href="#The-Problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Problem<a class="anchor-link" href="#The-Problem"> </a>
+</h1>
+<p>In the graph below we see the XOR operator outputs.  XOR is similar to OR.  If either one of the bits is positive, then the result is positive.  The difference is that if both are positive, then the result is negative.</p>
+<p>We can see the 2 classes as red and blue dots on the visualization.  Try to draw a single line that divides the red dots from the blue dots and you will find that it cannot be done.  A linear model simply cannot classify these points accurately</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'x1'</span><span class="p">,</span><span class="s1">'x2'</span><span class="p">]);</span> <span class="n">out</span><span class="p">[</span><span class="s1">'XOR'</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+
+<span class="n">class1</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">XOR</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,:</span><span class="mi">2</span><span class="p">];</span> <span class="n">class2</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">XOR</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,:</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">class1</span><span class="o">.</span><span class="n">x1</span><span class="p">,</span><span class="n">class1</span><span class="o">.</span><span class="n">x2</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="s1">'red'</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">class2</span><span class="o">.</span><span class="n">x1</span><span class="p">,</span><span class="n">class2</span><span class="o">.</span><span class="n">x2</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="s1">'blue'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">'Input1'</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">'Input2'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'Input Data'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARIAAAEWCAYAAACqphg1AAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjMuMywgaHR0cHM6Ly9tYXRwbG90bGliLm9yZy/Il7ecAAAACXBIWXMAAAsTAAALEwEAmpwYAAATgUlEQVR4nO3dfZBddX3H8fcnCZHJGEDNqpinDRpmTLEt9BahjoIj1gA1caqFBBjFMm59wNpqHdNGKY2DD/hYx7R0fRg0LmBgHF1rEJ9IqUhMlgKBhOKsMSEbUZYHYyDlIfjtH+csniz7cDe/+7t7b/bzmtm55/7Ob8/57t29n/2d373nXEUEZmYppk12AWbW/hwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkU5CknZLOaMJ+LpX0tTpq+T9J+yT9RtJPJL1dUl1/m5I6JYWkGY2p2g6Fg8RawesjYjawEPgY8AHgS5Nbkk2Eg2SKk3ShpB9L+qSkhyX9QtKZlfUbJX1U0mZJv5X0LUnPLdedLmlg2PZ2SjpD0lLgn4BzJT0i6Y7xaomIvRHRC5wLvEXSCeU2z5Z0W7n/3ZIurXzbTeXtb8r9nCrpxZJ+JOlBSQ9I6pF0TMrjZGNzkBjAy4F7gDnA5cCXJKmy/s3AXwPHAgeAz423wYj4LvAR4OsR8eyI+KN6i4mIzcAA8Mqy6dGyhmOAs4F3SHpDue5V5e0x5X5uAQR8FHgR8FJgPnBpvfu3iXOQGMCuiPhCRDwFfIUiMF5QWb8uIu6KiEeBDwHnSJqeuaZfAs8FiIiNEXFnRPwuIrYCVwOnjfaNEdEfEd+PiMcjYhD49Fj9LZ0nqAzgV0MLEbG/HIw8u7J+d2V5F3AExeglp7nAQwCSXk4xd3ICMBN4FnDtaN8o6QXAv1KMaGZT/MN8OHO9U5pHJFaP+ZXlBcCTwAMUhxyzhlaUo5SOSt9DOrVc0p9SBMmPy6argF5gfkQcDVxBcfgy2j4+Ura/LCKOAi6o9LcMHCRWjwskLZE0C1gDXFceBv0MOLKcDD0C+CDFaGHIr4HOCbyUe5SkvwCuAb4WEXeWq2YDD0XEY5JOBs6rfNsg8DvguErbbOARYK+kucD7J/oD28Q4SKwe64ArKQ6BjgT+FopXWYB3Al8E9lCMUKqv4gwdfjwo6X/G2P63Je2jOIRaTTGn8dbK+ncCa8o+lwDrh1ZExH7gMuDm8n0opwD/ApwE7AW+A3xj4j+yTYR8YSMbi6SNFKODL052Lda6PCIxs2QOEjNL5kMbM0vmEYmZJWu7N6TNmTMnOjs7J7sMsynn1ltvfSAiOkZa13ZB0tnZSV9f32SXYTblSNo12jof2phZMgeJmSVzkJhZMgeJmSVzkJhZsmxBIunLku6XdNco6yXpc5L6JW2VdFIj9tvTA52dMG1acdvT04itmh2GGvhkyTkiuRJYOsb6M4HF5VcX8O+pO+zpga4u2LULIorbri6HidkzNPjJki1IIuImyitcjWI58NUobAKOkXRsyj5Xr4b9+w9u27+/aDezigY/WSZzjmQuB1/Cb6BsewZJXZL6JPUNDg6OusF7751Yu9mU1eAnS1tMtkZEd0TUIqLW0THiO3QBWLBgYu1mU1aDnyyTGSR7OPhaoPPKtkN22WUwa9bBbbNmFe1mVtHgJ8tkBkkv8Oby1ZtTgL0RcV/KBs8/H7q7YeFCkIrb7u6i3cwqGvxkyXY9EklXA6dTfGzBr4F/pvgYAyLiivIDmD5P8crOfuCtETHu2Xi1Wi180p5Z80m6NSJqI63LdvZvRKwcZ30A78q1fzNrnraYbDWz1uYgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS+YgMbNkDhIzS5Y1SCQtlXSPpH5Jq0ZYv0DSjZJuk7RV0lk56zGzPLIFiaTpwFrgTGAJsFLSkmHdPgisj4gTgRXAv+Wqx8zyyTkiORnoj4gdEfEEcA2wfFifAI4ql48GfpmxHjPLJGeQzAV2V+4PlG1VlwIXSBoANgDvHmlDkrok9UnqGxwczFGrmSWY7MnWlcCVETEPOAtYJ+kZNUVEd0TUIqLW0dHR9CLNbGw5g2QPML9yf17ZVnURsB4gIm4BjgTmZKzJzDLIGSRbgMWSFkmaSTGZ2jusz73AawAkvZQiSHzsYtZmsgVJRBwALgZuAO6meHVmm6Q1kpaV3d4HvE3SHcDVwIUREblqMrM8ZuTceERsoJhErbZdUlneDrwiZw1mlt9kT7aa2WHAQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmybIGiaSlku6R1C9p1Sh9zpG0XdI2SVflrMfM8piRa8OSpgNrgdcCA8AWSb0Rsb3SZzHwj8ArIuJhSc/PVY+Z5ZNzRHIy0B8ROyLiCeAaYPmwPm8D1kbEwwARcX/Geswsk5xBMhfYXbk/ULZVHQ8cL+lmSZskLR1pQ5K6JPVJ6hscHMxUrpkdqsmebJ0BLAZOB1YCX5B0zPBOEdEdEbWIqHV0dDS3QjMbV84g2QPMr9yfV7ZVDQC9EfFkRPwC+BlFsJhZG8kZJFuAxZIWSZoJrAB6h/X5JsVoBElzKA51dmSsycwyyBYkEXEAuBi4AbgbWB8R2yStkbSs7HYD8KCk7cCNwPsj4sFcNZlZHoqIya5hQmq1WvT19U12GWZTjqRbI6I20rrJnmw1s8NAXUEi6YgR2uY0vhwza0djBomkV0saAO6T9D1JnZXV38tamZm1jfFGJJcDr4uIOUA38H1Jp5TrlLUyM2sb451rMzMitgFExHWS7ga+IekDQHvN0ppZNuMFyZOSXhgRvwIoX759DfCfwIuzV2dmbWG8Q5tVwAuqDRExAJwGfCxXUWbWXsYMkoj4QUTcIek9w9r3Ao9krczM2ka97yN5ywhtFzawDjNrY2POkUhaCZwHLJJUPU9mNvBQzsLMrH2MN9n6E+A+YA7wqUr7PmBrrqLMrL2MGSQRsQvYBZzanHLMrB3Vdc1WSfv4/ftGZgJHAI9GxFG5CjOz9lFXkETE7KFlSaK49uopo3+HmU0lEz77NwrfBF7X+HLMrB3Ve2jzl5W704Aa8FiWisys7dT7uTavrywfAHbyzI+WMLMpqt45krfmLsTM2le9FzY6TtK3JQ1Kul/StyQdl7s4M2sP9U62XgWsB44FXgRcC1ydqygzay/1BsmsiFgXEQfKr68BR+YszMzaR72TrddLWkXx+b0BnAtskPRcgIjweTdmU1i9QXJOefs3w9pXUASL50vMprB6X7VZlLsQM2tf9Y5IkPRnQGf1eyLiqxlqMrM2U+87W9dRXKP1duCpsjkAB4mZ1T0iqQFLot0+39PMmqLel3/vAl6YsxAza1/1jkjmANslbQYeH2qMiGVZqjKztlJvkFyaswgza2/1vvz7X7kLMbP2Nd6HiO+T9NsRvvZJ+u14G5e0VNI9kvrLd8aO1u+NkkJS7VB+CDObXONd/Hn2WOvHImk6sBZ4LTAAbJHUGxHbh/WbDbwH+Omh7svMJteEL7U4AScD/RGxIyKeoDhPZ6SLIX0Y+Di+4ppZ28oZJHOB3ZX7A2Xb0ySdBMyPiO+MtSFJXZL6JPUNDg42vlIzS5IzSMYkaRrwaeB94/WNiO6IqEVEraOjI39xZjYhOYNkDzC/cn9e2TZkNnACsFHSToqPt+j1hKtZ+8kZJFuAxZIWSZpJccmBpz8/OCL2RsSciOiMiE5gE7AsIvoy1mRmGWQLkog4AFwM3ADcDayPiG2S1kjyO2LNDiN1X0bgUETEBmDDsLZLRul7es5azCyfSZtsNbPDh4PEzJI5SMwsmYPEzJI5SMwsmYPEzJI5SMwsmYPEzJI5SMwsmYPEzJI5SMwsmYPEzJI5SMwsmYPEzJI5SMwsmYPEzJI5SMwsmYPEzJI5SMwsmYPEzJI5SMwsmYPEzJI5SMwsmYPEzJI5SMwsmYPEzJI5SMwsmYPEzJI5SMwsmYPEzJJlDRJJSyXdI6lf0qoR1r9X0nZJWyX9UNLCnPWYWR7ZgkTSdGAtcCawBFgpacmwbrcBtYj4Q+A64PJc9ZhZPjlHJCcD/RGxIyKeAK4Bllc7RMSNEbG/vLsJmJexHjPLJGeQzAV2V+4PlG2juQi4fqQVkrok9UnqGxwcbGCJZtYILTHZKukCoAZ8YqT1EdEdEbWIqHV0dDS3ODMb14yM294DzK/cn1e2HUTSGcBq4LSIeDxjPWaWSc4RyRZgsaRFkmYCK4DeagdJJwL/ASyLiPsz1mJmGWULkog4AFwM3ADcDayPiG2S1khaVnb7BPBs4FpJt0vqHWVzZtbCch7aEBEbgA3D2i6pLJ+Rc/9m1hwtMdlqZu3NQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpbMQWJmyRwkZpYsa5BIWirpHkn9klaNsP5Zkr5erv+ppM7knfb0QGcnTJtW3Pb0JG/S7HDUyKdKtiCRNB1YC5wJLAFWSloyrNtFwMMR8RLgM8DHk3ba0wNdXbBrF0QUt11dDhOzYRr9VMk5IjkZ6I+IHRHxBHANsHxYn+XAV8rl64DXSNIh73H1ati//+C2/fuLdjN7WqOfKjmDZC6wu3J/oGwbsU9EHAD2As8bviFJXZL6JPUNDg6Ovsd7751Yu9kU1einSltMtkZEd0TUIqLW0dExescFCybWbjZFNfqpkjNI9gDzK/fnlW0j9pE0AzgaePCQ93jZZTBr1sFts2YV7Wb2tEY/VXIGyRZgsaRFkmYCK4DeYX16gbeUy28CfhQRcch7PP986O6GhQtBKm67u4t2M3tao58qSnnejrtx6Szgs8B04MsRcZmkNUBfRPRKOhJYB5wIPASsiIgdY22zVqtFX19ftprNbGSSbo2I2kjrZuTccURsADYMa7uksvwY8Fc5azCz/NpistXMWpuDxMySOUjMLJmDxMySZX3VJgdJg8CuOrrOAR7IXE6qVq+x1esD19gI9da3MCJGfEdo2wVJvST1jfZSVato9RpbvT5wjY3QiPp8aGNmyRwkZpbscA6S7skuoA6tXmOr1weusRGS6zts50jMrHkO5xGJmTWJg8TMkrV9kEzKBaYbW997JW2XtFXSDyUtbGZ99dRY6fdGSSGp6S9l1lOjpHPKx3KbpKtaqT5JCyTdKOm28nd9VpPr+7Kk+yXdNcp6SfpcWf9WSSdNaAcR0bZfFJcn+DlwHDATuANYMqzPO4EryuUVwNdbrL5XA7PK5Xc0s756ayz7zQZuAjYBtVarEVgM3AY8p7z//Barrxt4R7m8BNjZ5MfwVcBJwF2jrD8LuB4QcArw04lsv91HJM2/wHSD64uIGyNi6DK8myiuJNdM9TyGAB+muMr/Y80srlRPjW8D1kbEwwARcX+L1RfAUeXy0cAvm1gfEXETxTV/RrMc+GoUNgHHSDq23u23e5A07ALTmdRTX9VFFP8VmmncGsth7vyI+E4zC6uo53E8Hjhe0s2SNkla2rTq6qvvUuACSQMU1+h5d3NKq9tE/1YPkvXCRlY/SRcANeC0ya6lStI04NPAhZNcynhmUBzenE4xqrtJ0ssi4jeTWVTFSuDKiPiUpFOBdZJOiIjfTXZhjdDuI5LmX2B6YuqpD0lnAKuBZRHxeJNqGzJejbOBE4CNknZSHD/3NnnCtZ7HcQDojYgnI+IXwM8ogqVV6rsIWA8QEbcAR1KcLNcq6vpbHVUzJ3wyTCDNAHYAi/j9JNcfDOvzLg6ebF3fYvWdSDFRt7hVH8Nh/TfS/MnWeh7HpcBXyuU5FMP057VQfdcDF5bLL6WYI1GTH8dORp9sPZuDJ1s3T2jbzfxBMj04Z1H89/k5sLpsW0Px3x2K5L8W6Ac2A8e1WH0/AH4N3F5+9bbaYzisb9ODpM7HURSHYNuBOykuJN5K9S0Bbi5D5nbgz5tc39XAfcCTFKO3i4C3A2+vPH5ry/rvnOjv2G+RN7Nk7T5HYmYtwEFiZskcJGaWzEFiZskcJGaWzEFiEybpkQzb7JR0XuX+88qzZR+R9PlG788ay0FiraITOK9y/zHgQ8A/TEo1NiEOEjtkkk6XtFHSdZL+V1LP0JnVknZKulzSnZI2S3pJ2X6lpDdVtjE0uvkY8EpJt0v6+4h4NCJ+zOScbWwT5CCxVCcCf0fxzs3jgFdU1u2NiJcBnwc+O852VgH/HRF/HBGfyVCnZeQgsVSbI2IgirNYb6c4RBlydeX21CbXZU3kILFU1bOVn+LgS1PECMsHKP/uyksUzMxanTWFg8RyOrdye0u5vBP4k3J5GXBEubyP4pIF1oZ8YSPL6TmStlKMWlaWbV8AviXpDuC7wKNl+1bgqbL9yoj4THn9k6OAmZLeQHHG7PZm/gBWH5/9a1mUIVCLiHo+5d7anA9tzCyZRyRmlswjEjNL5iAxs2QOEjNL5iAxs2QOEjNL9v/Ri0pU+3Pz3QAAAABJRU5ErkJggg==%0A">
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Neural-Network-Feature-Space">
+<a class="anchor" href="#Neural-Network-Feature-Space" aria-hidden="true"><span class="octicon octicon-link"></span></a>Neural Network Feature Space<a class="anchor-link" href="#Neural-Network-Feature-Space"> </a>
+</h1>
+<p>Now that we see a linear model cannot solve the problem, or said another way it's not linearly seperable, let's see how a Neural Network would help.</p>
+<p>We start by defining the tensors that we need:</p>
+<ul>
+<li>x: This shows all the points and are the inputs we are using to predict with.  You can verify the points on the graph above.</li>
+<li>w: This is the weight matrix.  A linear layer is xw + b.  </li>
+<li>b: This is the bias.  A linear layer is xw + b</li>
+<li>y: This is the dependent variable we are trying to predict (whether the dot is blue or red, or XOR operator output)
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>The text and some libraries do transposes to have wx + b, but it’s the same thing. 
+</div>
+</li>
+</ul>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span> 
+<span class="n">b</span> <span class="o">=</span> <span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we do out linear layer with activation function and store that in h.</p>
+<ul>
+<li>x@w + b : This is the linear function</li>
+<li>torch.clip : This is replacing any negative values with 0.  The fancy term for this is a ReLU or Rectified Linear Unit</li>
+</ul>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">h</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span><span class="nd">@w</span> <span class="o">+</span> <span class="n">b</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Instead of plotting our inputs like we did above (when we saw this problem couldn't be solved linearly), let's plot the outputs of layer we just calculated.</p>
+<p>As you can see when we plot the output of the first layer it's trivial to separate the blue and red points with a line.  We have created a represenation of the data that makes it very easy to classify the points to solve the XOR problem!</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'x1'</span><span class="p">,</span><span class="s1">'x2'</span><span class="p">]);</span> <span class="n">out</span><span class="p">[</span><span class="s1">'XOR'</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+<span class="n">class1</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">XOR</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,:</span><span class="mi">2</span><span class="p">];</span> <span class="n">class2</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">XOR</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,:</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">class1</span><span class="o">.</span><span class="n">x1</span><span class="p">,</span><span class="n">class1</span><span class="o">.</span><span class="n">x2</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="s1">'red'</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">class2</span><span class="o">.</span><span class="n">x1</span><span class="p">,</span><span class="n">class2</span><span class="o">.</span><span class="n">x2</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="s1">'blue'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">'Feature1'</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">'Feature2'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'Hidden Features'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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%0A">
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Model-Predictions">
+<a class="anchor" href="#Model-Predictions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Model Predictions<a class="anchor-link" href="#Model-Predictions"> </a>
+</h1>
+<p>Now that it's linearly seperable, we can easily add an output layer to form out predictions.  All we do for this is multiply my another Tensor so that we get the correct number of outputs.  In this case we have 4 points we want to classify, so we have 4 outputs (1 per point).</p>
+<p>We see that the model was able to solve the XOR problem</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">h</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span><span class="nd">@w</span> <span class="o">+</span> <span class="n">b</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">@</span> <span class="n">Tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">int</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">'x1'</span><span class="p">,</span><span class="s1">'x2'</span><span class="p">]);</span> <span class="n">res</span><span class="p">[</span><span class="s1">'preds'</span><span class="p">]</span><span class="o">=</span><span class="n">h</span><span class="o">.</span><span class="n">int</span><span class="p">();</span> <span class="n">res</span><span class="p">[</span><span class="s1">'targets'</span><span class="p">]</span><span class="o">=</span><span class="n">y</span>
+<span class="n">res</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>x1</th>
+      <th>x2</th>
+      <th>preds</th>
+      <th>targets</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="Isaac-Flath/fastblog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/fastblog/neural%20networks/foundations/2021/01/09/NeuralNetworksXOR.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/fastblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/fastblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/fastblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>A personal blog of technical topics relating the machine learning</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://twitter.com/isaac_flath" title="isaac_flath"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

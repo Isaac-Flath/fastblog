@@ -1,0 +1,2279 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Neural Network Basics (Part 1) | Isaac’s Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Neural Network Basics (Part 1)" />
+<meta name="author" content="Isaac Flath" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Under the hood of a basic Deep Learning Image Classifier" />
+<meta property="og:description" content="Under the hood of a basic Deep Learning Image Classifier" />
+<link rel="canonical" href="https://isaac-flath.github.io/fastblog/computer%20vision/image%20classification/2020/06/19/NeuralNetworkBasicsP1.html" />
+<meta property="og:url" content="https://isaac-flath.github.io/fastblog/computer%20vision/image%20classification/2020/06/19/NeuralNetworkBasicsP1.html" />
+<meta property="og:site_name" content="Isaac’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-06-19T00:00:00-05:00" />
+<script type="application/ld+json">
+{"url":"https://isaac-flath.github.io/fastblog/computer%20vision/image%20classification/2020/06/19/NeuralNetworkBasicsP1.html","@type":"BlogPosting","headline":"Neural Network Basics (Part 1)","dateModified":"2020-06-19T00:00:00-05:00","datePublished":"2020-06-19T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://isaac-flath.github.io/fastblog/computer%20vision/image%20classification/2020/06/19/NeuralNetworkBasicsP1.html"},"author":{"@type":"Person","name":"Isaac Flath"},"description":"Under the hood of a basic Deep Learning Image Classifier","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/fastblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://isaac-flath.github.io/fastblog/feed.xml" title="Isaac's Blog" /><link rel="shortcut icon" type="image/x-icon" href="/fastblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/fastblog/">Isaac&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/fastblog/about/">About Me</a><a class="page-link" href="/fastblog/search/">Search</a><a class="page-link" href="/fastblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Neural Network Basics (Part 1)</h1><p class="page-description">Under the hood of a basic Deep Learning Image Classifier</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-06-19T00:00:00-05:00" itemprop="datePublished">
+        Jun 19, 2020
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Isaac Flath</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      14 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Computer Vision">Computer Vision</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Image Classification">Image Classification</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/Isaac-Flath/fastblog/tree/master/_notebooks/2020-06-19-NeuralNetworkBasicsP1.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/fastblog/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/Isaac-Flath/fastblog/master?filepath=_notebooks%2F2020-06-19-NeuralNetworkBasicsP1.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/Isaac-Flath/fastblog/blob/master/_notebooks/2020-06-19-NeuralNetworkBasicsP1.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Intro">Intro </a></li>
+<li class="toc-entry toc-h1"><a href="#Load-the-Data">Load the Data </a></li>
+<li class="toc-entry toc-h1"><a href="#Defining-our-Linear-Equation">Defining our Linear Equation </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Setup">Setup </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Loss-Function">Loss Function </a></li>
+<li class="toc-entry toc-h1"><a href="#Gradient-Descent">Gradient Descent </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Background-and-Setup">Background and Setup </a></li>
+<li class="toc-entry toc-h3"><a href="#Calculate-the-Gradient">Calculate the Gradient </a></li>
+<li class="toc-entry toc-h3"><a href="#Training-the-Model">Training the Model </a></li>
+<li class="toc-entry toc-h3"><a href="#Linear-Recap">Linear Recap </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#ReLu">ReLu </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#What-is-it?">What is it? </a></li>
+<li class="toc-entry toc-h3"><a href="#In-a-Neural-Network">In a Neural Network </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Train-the-Full-Neural-Network">Train the Full Neural Network </a></li>
+<li class="toc-entry toc-h1"><a href="#Recap-of-Tensor-Shapes">Recap of Tensor Shapes </a></li>
+<li class="toc-entry toc-h1"><a href="#What-More?">What More? </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2020-06-19-NeuralNetworkBasicsP1.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">fastai.vision.all</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">fastai.data.external</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&lt;torch._C.Generator at 0x7f38fc038470&gt;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Intro">
+<a class="anchor" href="#Intro" aria-hidden="true"><span class="octicon octicon-link"></span></a>Intro<a class="anchor-link" href="#Intro"> </a>
+</h1>
+<p>Today we will be working with a subset of the MNIST dataset. The goal is going to be to take an image of handwritten digits and automatically predict whether it is a 3 or a 7.  We will be building a Neural Network to do this.</p>
+<p>If you get through this and want more detail, I highly recommend checking out Deep Learning for Coders with fastai &amp; Pytorch by Jeremy Howard and Sylvain Gugger. All of the material in this guide and more is covered in much greater detail in that book.  They have some awesome courses on their fast.ai website as well.</p>
+<p><a href="https://www.amazon.com/Deep-Learning-Coders-fastai-PyTorch/dp/1492045527">https://www.amazon.com/Deep-Learning-Coders-fastai-PyTorch/dp/1492045527</a></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Load-the-Data">
+<a class="anchor" href="#Load-the-Data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Load the Data<a class="anchor-link" href="#Load-the-Data"> </a>
+</h1>
+<p>Naturally, the first step is to get and load the data.  We'll look at it a bit along tohe way to make sure it was loaded properly and we understand it.  We will be using fastai's built in dataset feature rather than sourcing it ourself.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="n">untar_data</span><span class="p">(</span><span class="n">URLs</span><span class="o">.</span><span class="n">MNIST_TINY</span><span class="p">)</span>
+
+<span class="c1"># This takes that path from above, and get the path for the threes and the sevens</span>
+<span class="n">threes</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span><span class="o">/</span><span class="s1">'train'</span><span class="o">/</span><span class="s1">'3'</span><span class="p">)</span><span class="o">.</span><span class="n">ls</span><span class="p">()</span><span class="o">.</span><span class="n">sorted</span><span class="p">()</span>
+<span class="n">sevens</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span><span class="o">/</span><span class="s1">'train'</span><span class="o">/</span><span class="s1">'7'</span><span class="p">)</span><span class="o">.</span><span class="n">ls</span><span class="p">()</span><span class="o">.</span><span class="n">sorted</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's take a look at an image.  The first thing I reccomend doing for any dataset is to view something to verify you loaded it right. The second thing is to look at the size of it.  This is not just for memory concerns, but you want to generally know some basics about whatever you are working with.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">im3</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">threes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">im3</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea output_execute_result">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAAAAABXZoBIAAAA4klEQVR4nGNgGEjgu/Xf//gIrFLMiZ/+/v3793cpPxZJkWN/IeC9NUKQCUq/Wfab4fv9VwwMfP7YDM5r3MAQ/Pfv30MSWO2VYgj++/fvXwMMYxkYGBieMTAwMDAceIZVEgLOvsIhmYLVOgYGBgYGx29///5dz4Jdcs3fv3//uuHQ6fT379+/78ywSwo6vvj79+9UVhx6dXv//v1bjUVC8+zZs4pMDX//fk2GCSHcxmnAwLBlnQEDw6cbmDqNoNHy9wpcCBEIj/fhcAjEXKvNv//+/XtbB4d899+/TYb4DKA9AABLQV4KAJgjfgAAAABJRU5ErkJggg==%0A">
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tensor</span><span class="p">(</span><span class="n">im3</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>torch.Size([28, 28])</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>What I am going to do below is put the tensor into a dataframe, and color the pixels based on the value in each place.  We can clearly see that this is a 3 just from the values in the tensor.  This should give a good idea for the data we are working with and how an image can be worked with.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">tensor</span><span class="p">(</span><span class="n">im3</span><span class="p">))</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">24</span><span class="p">,</span><span class="mi">6</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">set_properties</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s1">'font-size'</span><span class="p">:</span><span class="s1">'6pt'</span><span class="p">})</span><span class="o">.</span><span class="n">background_gradient</span><span class="p">(</span><span class="s1">'Greys'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<style type="text/css">
+#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col14,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col0,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col14{
+            font-size:  6pt;
+            background-color:  #ffffff;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col3{
+            font-size:  6pt;
+            background-color:  #cdcdcd;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col4{
+            font-size:  6pt;
+            background-color:  #5b5b5b;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col1,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col13,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col4,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col9,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col9{
+            font-size:  6pt;
+            background-color:  #000000;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col7{
+            font-size:  6pt;
+            background-color:  #bdbdbd;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col8{
+            font-size:  6pt;
+            background-color:  #c3c3c3;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col1{
+            font-size:  6pt;
+            background-color:  #ececec;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col2{
+            font-size:  6pt;
+            background-color:  #999999;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col3{
+            font-size:  6pt;
+            background-color:  #0d0d0d;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col5{
+            font-size:  6pt;
+            background-color:  #010101;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col8,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col6,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col7{
+            font-size:  6pt;
+            background-color:  #020202;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col9{
+            font-size:  6pt;
+            background-color:  #a2a2a2;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col10{
+            font-size:  6pt;
+            background-color:  #f8f8f8;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col10,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col12{
+            font-size:  6pt;
+            background-color:  #101010;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col11{
+            font-size:  6pt;
+            background-color:  #dcdcdc;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col2,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col11{
+            font-size:  6pt;
+            background-color:  #898989;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col3{
+            font-size:  6pt;
+            background-color:  #060606;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col5{
+            font-size:  6pt;
+            background-color:  #0c0c0c;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col6{
+            font-size:  6pt;
+            background-color:  #292929;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col7{
+            font-size:  6pt;
+            background-color:  #1a1a1a;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col3{
+            font-size:  6pt;
+            background-color:  #aaaaaa;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col4{
+            font-size:  6pt;
+            background-color:  #939393;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col10{
+            font-size:  6pt;
+            background-color:  #616161;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col7{
+            font-size:  6pt;
+            background-color:  #c8c8c8;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col11{
+            font-size:  6pt;
+            background-color:  #4b4b4b;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col5{
+            font-size:  6pt;
+            background-color:  #f3f3f3;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col3,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col3{
+            font-size:  6pt;
+            background-color:  #e3e3e3;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col11{
+            font-size:  6pt;
+            background-color:  #525252;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col3{
+            font-size:  6pt;
+            background-color:  #f5f5f5;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col7{
+            font-size:  6pt;
+            background-color:  #585858;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col5,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col6{
+            font-size:  6pt;
+            background-color:  #d8d8d8;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col6{
+            font-size:  6pt;
+            background-color:  #0a0a0a;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col11,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col12{
+            font-size:  6pt;
+            background-color:  #fdfdfd;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col5{
+            font-size:  6pt;
+            background-color:  #656565;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col10{
+            font-size:  6pt;
+            background-color:  #d4d4d4;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col5{
+            font-size:  6pt;
+            background-color:  #d7d7d7;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col10{
+            font-size:  6pt;
+            background-color:  #111111;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col11{
+            font-size:  6pt;
+            background-color:  #e0e0e0;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col5{
+            font-size:  6pt;
+            background-color:  #f7f7f7;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col7{
+            font-size:  6pt;
+            background-color:  #181818;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col11{
+            font-size:  6pt;
+            background-color:  #7d7d7d;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col7,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col12{
+            font-size:  6pt;
+            background-color:  #e7e7e7;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col8{
+            font-size:  6pt;
+            background-color:  #868686;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col12{
+            font-size:  6pt;
+            background-color:  #959595;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col3{
+            font-size:  6pt;
+            background-color:  #e9e9e9;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col4{
+            font-size:  6pt;
+            background-color:  #3c3c3c;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col5{
+            font-size:  6pt;
+            background-color:  #3d3d3d;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col6{
+            font-size:  6pt;
+            background-color:  #3f3f3f;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col7{
+            font-size:  6pt;
+            background-color:  #efefef;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col8{
+            font-size:  6pt;
+            background-color:  #fefefe;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col9{
+            font-size:  6pt;
+            background-color:  #949494;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col7{
+            font-size:  6pt;
+            background-color:  #303030;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col8{
+            font-size:  6pt;
+            background-color:  #919191;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col9{
+            font-size:  6pt;
+            background-color:  #5d5d5d;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col13{
+            font-size:  6pt;
+            background-color:  #7b7b7b;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col12,#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col11{
+            font-size:  6pt;
+            background-color:  #282828;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col4{
+            font-size:  6pt;
+            background-color:  #545454;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col4{
+            font-size:  6pt;
+            background-color:  #fbfbfb;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col5{
+            font-size:  6pt;
+            background-color:  #dddddd;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col6{
+            font-size:  6pt;
+            background-color:  #5f5f5f;
+            color:  #f1f1f1;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col7{
+            font-size:  6pt;
+            background-color:  #888888;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col10{
+            font-size:  6pt;
+            background-color:  #929292;
+            color:  #000000;
+        }#T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col11{
+            font-size:  6pt;
+            background-color:  #e4e4e4;
+            color:  #000000;
+        }</style>
+<table id="T_6c54dfec_0391_11eb_9a38_c36b322c401b">
+<thead>    <tr>        <th class="blank level0"></th>        <th class="col_heading level0 col0">6</th>        <th class="col_heading level0 col1">7</th>        <th class="col_heading level0 col2">8</th>        <th class="col_heading level0 col3">9</th>        <th class="col_heading level0 col4">10</th>        <th class="col_heading level0 col5">11</th>        <th class="col_heading level0 col6">12</th>        <th class="col_heading level0 col7">13</th>        <th class="col_heading level0 col8">14</th>        <th class="col_heading level0 col9">15</th>        <th class="col_heading level0 col10">16</th>        <th class="col_heading level0 col11">17</th>        <th class="col_heading level0 col12">18</th>        <th class="col_heading level0 col13">19</th>        <th class="col_heading level0 col14">20</th>    </tr>
+</thead>
+<tbody>
+                <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row0" class="row_heading level0 row0">3</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col0" class="data row0 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col1" class="data row0 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col2" class="data row0 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col3" class="data row0 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col4" class="data row0 col4">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col5" class="data row0 col5">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col6" class="data row0 col6">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col7" class="data row0 col7">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col8" class="data row0 col8">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col9" class="data row0 col9">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col10" class="data row0 col10">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col11" class="data row0 col11">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col12" class="data row0 col12">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col13" class="data row0 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow0_col14" class="data row0 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row1" class="row_heading level0 row1">4</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col0" class="data row1 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col1" class="data row1 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col2" class="data row1 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col3" class="data row1 col3">77</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col4" class="data row1 col4">181</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col5" class="data row1 col5">254</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col6" class="data row1 col6">255</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col7" class="data row1 col7">95</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col8" class="data row1 col8">88</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col9" class="data row1 col9">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col10" class="data row1 col10">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col11" class="data row1 col11">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col12" class="data row1 col12">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col13" class="data row1 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow1_col14" class="data row1 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row2" class="row_heading level0 row2">5</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col0" class="data row2 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col1" class="data row2 col1">3</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col2" class="data row2 col2">97</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col3" class="data row2 col3">242</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col4" class="data row2 col4">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col5" class="data row2 col5">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col6" class="data row2 col6">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col7" class="data row2 col7">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col8" class="data row2 col8">251</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col9" class="data row2 col9">117</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col10" class="data row2 col10">15</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col11" class="data row2 col11">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col12" class="data row2 col12">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col13" class="data row2 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow2_col14" class="data row2 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row3" class="row_heading level0 row3">6</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col0" class="data row3 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col1" class="data row3 col1">20</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col2" class="data row3 col2">198</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col3" class="data row3 col3">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col4" class="data row3 col4">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col5" class="data row3 col5">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col6" class="data row3 col6">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col7" class="data row3 col7">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col8" class="data row3 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col9" class="data row3 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col10" class="data row3 col10">239</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col11" class="data row3 col11">59</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col12" class="data row3 col12">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col13" class="data row3 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow3_col14" class="data row3 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row4" class="row_heading level0 row4">7</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col0" class="data row4 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col1" class="data row4 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col2" class="data row4 col2">108</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col3" class="data row4 col3">248</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col4" class="data row4 col4">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col5" class="data row4 col5">244</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col6" class="data row4 col6">220</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col7" class="data row4 col7">231</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col8" class="data row4 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col9" class="data row4 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col10" class="data row4 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col11" class="data row4 col11">138</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col12" class="data row4 col12">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col13" class="data row4 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow4_col14" class="data row4 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row5" class="row_heading level0 row5">8</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col0" class="data row5 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col1" class="data row5 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col2" class="data row5 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col3" class="data row5 col3">110</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col4" class="data row5 col4">129</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col5" class="data row5 col5">176</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col6" class="data row5 col6">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col7" class="data row5 col7">83</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col8" class="data row5 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col9" class="data row5 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col10" class="data row5 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col11" class="data row5 col11">194</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col12" class="data row5 col12">24</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col13" class="data row5 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow5_col14" class="data row5 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row6" class="row_heading level0 row6">9</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col0" class="data row6 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col1" class="data row6 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col2" class="data row6 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col3" class="data row6 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col4" class="data row6 col4">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col5" class="data row6 col5">26</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col6" class="data row6 col6">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col7" class="data row6 col7">83</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col8" class="data row6 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col9" class="data row6 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col10" class="data row6 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col11" class="data row6 col11">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col12" class="data row6 col12">48</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col13" class="data row6 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow6_col14" class="data row6 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row7" class="row_heading level0 row7">10</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col0" class="data row7 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col1" class="data row7 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col2" class="data row7 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col3" class="data row7 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col4" class="data row7 col4">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col5" class="data row7 col5">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col6" class="data row7 col6">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col7" class="data row7 col7">83</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col8" class="data row7 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col9" class="data row7 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col10" class="data row7 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col11" class="data row7 col11">189</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col12" class="data row7 col12">22</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col13" class="data row7 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow7_col14" class="data row7 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row8" class="row_heading level0 row8">11</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col0" class="data row8 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col1" class="data row8 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col2" class="data row8 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col3" class="data row8 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col4" class="data row8 col4">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col5" class="data row8 col5">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col6" class="data row8 col6">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col7" class="data row8 col7">83</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col8" class="data row8 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col9" class="data row8 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col10" class="data row8 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col11" class="data row8 col11">138</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col12" class="data row8 col12">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col13" class="data row8 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow8_col14" class="data row8 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row9" class="row_heading level0 row9">12</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col0" class="data row9 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col1" class="data row9 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col2" class="data row9 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col3" class="data row9 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col4" class="data row9 col4">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col5" class="data row9 col5">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col6" class="data row9 col6">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col7" class="data row9 col7">183</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col8" class="data row9 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col9" class="data row9 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col10" class="data row9 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col11" class="data row9 col11">138</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col12" class="data row9 col12">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col13" class="data row9 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow9_col14" class="data row9 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row10" class="row_heading level0 row10">13</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col0" class="data row10 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col1" class="data row10 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col2" class="data row10 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col3" class="data row10 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col4" class="data row10 col4">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col5" class="data row10 col5">65</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col6" class="data row10 col6">246</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col7" class="data row10 col7">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col8" class="data row10 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col9" class="data row10 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col10" class="data row10 col10">175</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col11" class="data row10 col11">4</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col12" class="data row10 col12">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col13" class="data row10 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow10_col14" class="data row10 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row11" class="row_heading level0 row11">14</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col0" class="data row11 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col1" class="data row11 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col2" class="data row11 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col3" class="data row11 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col4" class="data row11 col4">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col5" class="data row11 col5">172</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col6" class="data row11 col6">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col7" class="data row11 col7">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col8" class="data row11 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col9" class="data row11 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col10" class="data row11 col10">70</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col11" class="data row11 col11">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col12" class="data row11 col12">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col13" class="data row11 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow11_col14" class="data row11 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row12" class="row_heading level0 row12">15</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col0" class="data row12 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col1" class="data row12 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col2" class="data row12 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col3" class="data row12 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col4" class="data row12 col4">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col5" class="data row12 col5">66</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col6" class="data row12 col6">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col7" class="data row12 col7">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col8" class="data row12 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col9" class="data row12 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col10" class="data row12 col10">238</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col11" class="data row12 col11">54</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col12" class="data row12 col12">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col13" class="data row12 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow12_col14" class="data row12 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row13" class="row_heading level0 row13">16</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col0" class="data row13 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col1" class="data row13 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col2" class="data row13 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col3" class="data row13 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col4" class="data row13 col4">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col5" class="data row13 col5">17</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col6" class="data row13 col6">65</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col7" class="data row13 col7">232</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col8" class="data row13 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col9" class="data row13 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col10" class="data row13 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col11" class="data row13 col11">149</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col12" class="data row13 col12">5</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col13" class="data row13 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow13_col14" class="data row13 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row14" class="row_heading level0 row14">17</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col0" class="data row14 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col1" class="data row14 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col2" class="data row14 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col3" class="data row14 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col4" class="data row14 col4">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col5" class="data row14 col5">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col6" class="data row14 col6">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col7" class="data row14 col7">45</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col8" class="data row14 col8">141</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col9" class="data row14 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col10" class="data row14 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col11" class="data row14 col11">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col12" class="data row14 col12">123</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col13" class="data row14 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow14_col14" class="data row14 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row15" class="row_heading level0 row15">18</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col0" class="data row15 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col1" class="data row15 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col2" class="data row15 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col3" class="data row15 col3">41</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col4" class="data row15 col4">205</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col5" class="data row15 col5">205</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col6" class="data row15 col6">205</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col7" class="data row15 col7">33</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col8" class="data row15 col8">2</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col9" class="data row15 col9">128</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col10" class="data row15 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col11" class="data row15 col11">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col12" class="data row15 col12">245</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col13" class="data row15 col13">99</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow15_col14" class="data row15 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row16" class="row_heading level0 row16">19</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col0" class="data row16 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col1" class="data row16 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col2" class="data row16 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col3" class="data row16 col3">50</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col4" class="data row16 col4">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col5" class="data row16 col5">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col6" class="data row16 col6">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col7" class="data row16 col7">213</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col8" class="data row16 col8">131</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col9" class="data row16 col9">179</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col10" class="data row16 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col11" class="data row16 col11">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col12" class="data row16 col12">231</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col13" class="data row16 col13">59</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow16_col14" class="data row16 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row17" class="row_heading level0 row17">20</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col0" class="data row17 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col1" class="data row17 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col2" class="data row17 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col3" class="data row17 col3">50</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col4" class="data row17 col4">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col5" class="data row17 col5">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col6" class="data row17 col6">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col7" class="data row17 col7">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col8" class="data row17 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col9" class="data row17 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col10" class="data row17 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col11" class="data row17 col11">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col12" class="data row17 col12">212</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col13" class="data row17 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow17_col14" class="data row17 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row18" class="row_heading level0 row18">21</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col0" class="data row18 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col1" class="data row18 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col2" class="data row18 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col3" class="data row18 col3">21</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col4" class="data row18 col4">187</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col5" class="data row18 col5">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col6" class="data row18 col6">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col7" class="data row18 col7">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col8" class="data row18 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col9" class="data row18 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col10" class="data row18 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col11" class="data row18 col11">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col12" class="data row18 col12">212</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col13" class="data row18 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow18_col14" class="data row18 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row19" class="row_heading level0 row19">22</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col0" class="data row19 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col1" class="data row19 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col2" class="data row19 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col3" class="data row19 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col4" class="data row19 col4">9</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col5" class="data row19 col5">58</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col6" class="data row19 col6">179</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col7" class="data row19 col7">251</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col8" class="data row19 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col9" class="data row19 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col10" class="data row19 col10">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col11" class="data row19 col11">219</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col12" class="data row19 col12">44</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col13" class="data row19 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow19_col14" class="data row19 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row20" class="row_heading level0 row20">23</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col0" class="data row20 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col1" class="data row20 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col2" class="data row20 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col3" class="data row20 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col4" class="data row20 col4">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col5" class="data row20 col5">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col6" class="data row20 col6">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col7" class="data row20 col7">139</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col8" class="data row20 col8">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col9" class="data row20 col9">253</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col10" class="data row20 col10">130</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col11" class="data row20 col11">49</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col12" class="data row20 col12">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col13" class="data row20 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow20_col14" class="data row20 col14">0</td>
+            </tr>
+            <tr>
+                        <th id="T_6c54dfec_0391_11eb_9a38_c36b322c401blevel0_row21" class="row_heading level0 row21">24</th>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col0" class="data row21 col0">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col1" class="data row21 col1">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col2" class="data row21 col2">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col3" class="data row21 col3">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col4" class="data row21 col4">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col5" class="data row21 col5">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col6" class="data row21 col6">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col7" class="data row21 col7">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col8" class="data row21 col8">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col9" class="data row21 col9">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col10" class="data row21 col10">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col11" class="data row21 col11">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col12" class="data row21 col12">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col13" class="data row21 col13">0</td>
+                        <td id="T_6c54dfec_0391_11eb_9a38_c36b322c401brow21_col14" class="data row21 col14">0</td>
+            </tr>
+    </tbody>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Defining-our-Linear-Equation">
+<a class="anchor" href="#Defining-our-Linear-Equation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Defining our Linear Equation<a class="anchor-link" href="#Defining-our-Linear-Equation"> </a>
+</h1>
+<p>We are looking to do xw + b = y.   It seems that a Neural network should use some super fancy equation in it's layers, but that's all it is. Basically the same equation everyone learns that defines a line (mx+b)</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Setup">
+<a class="anchor" href="#Setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup<a class="anchor-link" href="#Setup"> </a>
+</h3>
+<p>We will need a wieght matrix with 1 weight per pixel, meaning this will be a 784 row by 1 column matrix.  In order to multiply this by our 784 pixels we need to frormat that in 1 row x 784 column matrix.  Then we can do matrix multiplication.  We are also going to add b, so let's initialize that as well.  Since we haven't solved the problem yet, we don't know what good values for w and b are so we will make them random to start with.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>When we checked the shape above, we saw our images were 28 x 28 pixels, which is 784 total pixels.
+</div>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">init_params</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">*</span><span class="n">std</span><span class="p">)</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">()</span>
+
+<span class="n">w</span> <span class="o">=</span> <span class="n">init_params</span><span class="p">((</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">init_params</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">max</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>tensor([2.8108], grad_fn=&lt;SelectBackward&gt;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we just need x and y.  A 784x1 matrix times a 1x784 matrix.  We want all values to be between 0 and 1, so we divide by the max pixel value (255)</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">threes_t</span> <span class="o">=</span> <span class="p">[</span><span class="n">tensor</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">threes</span><span class="p">]</span>
+<span class="n">sevens_t</span> <span class="o">=</span> <span class="p">[</span><span class="n">tensor</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sevens</span><span class="p">]</span>
+
+<span class="c1"># Get my list of tensors and "stack" them.  Also dividing by 255 so all values are between 0 and 1</span>
+<span class="n">threes_s</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">threes_t</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">/</span><span class="mi">255</span>
+<span class="n">sevens_s</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sevens_t</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">/</span><span class="mi">255</span>
+
+<span class="c1">#Verify max and min pixel values</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">threes_s</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">threes_s</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">sevens_s</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sevens_s</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(tensor(0.), tensor(1.), tensor(0.), tensor(1.))</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's do a simple average of all our threes together and see what we get.  It's a nice sanity check to see that we did things ok.  We can see that after averaging, we pretty much get a three!</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">show_image</span><span class="p">(</span><span class="n">threes_s</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7f9fdda2a410&gt;</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAABECAYAAAA4E5OyAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjEsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy8QZhcZAAAHDElEQVR4nO1cSXMbRRh9s2lfLVmWHSfYhOAqkoIDVw5c+AnwI/hrXLhDCg4UxZVQFCQkZLUdS44tWdtII01zeF/LpcYENBJFiup3ac/WPerv9be8nrKjlILFJdz/+gXeNNgJMWAnxICdEAN2Qgz4r7v4ifvp/zYEfRV/4Vx13jLEgJ0QA3ZCDNgJMWAnxMBro8za4NChO55nnL+0h+Px7z/VVjGP1TSC3PDvvKPAMsTAehhiMMDJZtnm2KJUAADMamyjUgoAMM3SHnHgQLnSx4wMcKdsg/6MbScEAHjnAwCAuuix7fM4ngiD4tlKP8UyxEAyhmhG+AEAwM1meFwqAgBmmxUAwGgnBwDo7XKY/nU+PtmaAgBKm7TyrVobGY/n2iOy6LBbBgAMXuYBAMWHPC495fXCM47lHZ+x09NXAIA4tAxZKxIyhPPoZNJsyyUAwKxZBQD03yIzuvv0KYPrtFplrwMA+LDWAgDcKR4BADb8PnLuGACQdycAgOfNDQDAt7UDAMC9/DUAQByQjcrlGKUxfYczGPLdwjDRT9KwDDGQiCFOwMecNKOFypIp0zx9yixFHxNL707M4+4FrfpjtAMAuHfCNvBm2MjTwjcK5wCAok9L53wyplAeAQAGTY6ZuqAtcy1GsuCEY8OVXCdhtLEMMZDMh0j2OPclESOE36c1M2eLGWn6XBiTojWVJ62YI/KBFwX6n9+3GwCAevMCALCZ77PPgGP0U5K5ulfb0pF8RsWJfplliIlkDJHpV9qjy7EndUYmpDVTZ1zXcZrDxIEwSu5Tks+ENR+9G2RVVGE7mS6yTCne6/XZRzBQckxWYrZa/qFhGWIgEUOU9iEhcwdtHTWmtZwe170vNQ1SZIqS6BTnGJXGDV4Pqy5GDfaZbjLa3Nw4XRizIxEqe0Km5I85lnfGseJRuPhuCWEZYmA1H2IuW72OI1150lqOz7ojLpERg+u09tkB/cRwP8LWLvOPD+qHAIBmmlHm+9O3+exLZqilZxwjc0xmzKteXe0mDS8CyxAD69FDtFVimd+UZLKih0x2WZe8usPjzm3ev/vuMQDgs+Z9fFS4DwBoerT8D6N9AMCXvfcBAJk2+/aHZILbp8+Y+w7NzhUVNcsQAwl9iM5Ur76slTNVpnYxuMb136PRcePgBADw+d43AICPs0doeNQ9+lL3/CTVbyHDtlXmmGGVfWcLosFIBJtHvBWx2pLRzlWWiuMuOjSdXseBPsHmImTYvdt5DwDweNxA1RcpUBKwSPHVrhcpGRxvi+gkzjWzS0ed77Hoc2VC4rG8Q8KlY5eMgX9lG0JvJbh9Jlm5lojLj0mVYVgDANzN09l+7SkoX9L5Ap1jvcGwe63YBQBsb5EprZ0tAED6nK+eaVOccju835mybFDSLgvLEAPLMUSKsXnZrzee3Ku9qxpwfWeeMOlKveL6nxbpQ2YZcb7e5ZZEWCaLurfIovg2+9qvUEw+qpNV4wqFokmVfWX1lsdQpETLkPVgSYZw/lwtLsv2w5w52rOLYKRlPOeCyZbbZZqdTi1Kj3AcqAyZkdpkWj8p81pvT8ZgkEGQZWIWSx9RnizLSF/zkL/UD7uEZYiBpRii5TknLdbI0ZpzS2vEzAW0tAhdeIk8oEt0LRTB9wBPi0c8JWkIPI8nprFsk7pGUqhbLSk6f5Et/kNYhhhI5EPg8zFVJEOmVbaz9KLs5wgTgnPJJiWrnMsEst5n5Twmm4wS3X36Er25tVui/wlnHDMK2YrWDG+0yMY4YXTRsAwxsBxDDPElztHTh5vSlsXiEhikLEGqx+vBkFmlP6T145TkHlUPgx3ePNijheu7zEwbOUamp13mH26bfaXP9OcSwgipZVRkGbJWLMWQuQgTMVq4I8kJPFp31JBthTqtNytINSyRwYl43Z2ID5LR41KEjU3WIu+UWLtsZXn8oMuNq9NDfg5ROKEN8ydkQnAqInP3Ql7SSohrxZI+RCpSWa9Oi/VFXmqTUZ0iz6jJ+7JNWu9mnR+zbGdp/axHZpV9Rp2qP0DgkH2tiH7mu/ZNAMCTR6xuC4/4qpWHvC/3gn2jzXeItUBkJcT1IpEeoj9wcwdUufwnlARrbhMA4I2Zl3TGtPYvY9nSlEhyUOT9aYd+4HhSwc/dbQDAr4fsI/iNeUntOS1eei4b6YeMOhB2xrIpturHdhqWIQZW26iSmK+G9AXBM24/1jv0JZUHtPK4Rh/Tqu0BAF4UqTZrrdUbA6kembB7yj4zbTLB7ZCFzlC2HfTGlM479Ae9a4JliIGVtiGU5COxMEbrmZCcwD+SzSWpgfJS0c4jgc5rYgU1kUpYX5M6SGcVlxtRq6nqfwfLEANrUd3Vikr3mwTLEAN2QgzYCTHg2H+GsAjLEAN2QgzYCTFgJ8SAnRADdkIM/AEM64jazDjepgAAAABJRU5ErkJggg==%0A">
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Perfect, lets finish definining our x.  We want x to have both threes and sevens, but right now they are seperate.  We will use torch.cat to combine them, and .view to change the format of the matrix to the right format.  Y is being defined as a long matrix with 1 row per image (prediction) and 1 column.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">threes_s</span><span class="p">,</span> <span class="n">sevens_s</span><span class="p">])</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">)</span>
+
+<span class="c1"># Set my y, or dependent variable matrix.  A three will be 1, and seven will be 0.  So we will be prediction 0 or 1.</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">threes</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">sevens</span><span class="p">))</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Combine by xs and ys into 1 dataset for convenience.</span>
+<span class="n">dset</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+<span class="n">x_0</span><span class="p">,</span><span class="n">y_0</span> <span class="o">=</span> <span class="n">dset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">x_0</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">y_0</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(torch.Size([784]), tensor([1]))</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Perfect.  We have exactly what we need and defined above.  A 784 x 1 matrix times a 1 x 784 matrix + a constanct = our prediction.  Let's take a look to verify things are the right shape, and if we actually multiply these things together we get 1 prediction per image.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">x_0</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">y_0</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(torch.Size([784, 1]), torch.Size([784]), torch.Size([1]), torch.Size([1]))</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">((</span><span class="n">x</span><span class="nd">@w</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="p">(</span><span class="n">x</span><span class="nd">@w</span><span class="o">+</span><span class="n">b</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>torch.Size([709, 1])
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>tensor([[ 3.3164],
+        [ 5.2035],
+        [-3.7491],
+        [ 1.2665],
+        [ 2.2916],
+        [ 1.3741],
+        [-7.6092],
+        [ 1.3464],
+        [ 2.7644]], grad_fn=&lt;SliceBackward&gt;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Great, we have the right number of predictions.  Obviosly the predictions are no good at predictions 0 or 1.  After all, our weights and biases are all random.  Let's do something about that.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will need to do all this on our validation set as well, so let's do that here.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Code" data-close="Show Code"></summary>
+        <p></p>
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">valid_3_tens</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">tensor</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">o</span><span class="p">))</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="p">(</span><span class="n">path</span><span class="o">/</span><span class="s1">'valid'</span><span class="o">/</span><span class="s1">'3'</span><span class="p">)</span><span class="o">.</span><span class="n">ls</span><span class="p">()])</span>
+<span class="n">valid_3_tens</span> <span class="o">=</span> <span class="n">valid_3_tens</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">/</span><span class="mi">255</span>
+<span class="n">valid_7_tens</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">tensor</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">o</span><span class="p">))</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="p">(</span><span class="n">path</span><span class="o">/</span><span class="s1">'valid'</span><span class="o">/</span><span class="s1">'7'</span><span class="p">)</span><span class="o">.</span><span class="n">ls</span><span class="p">()])</span>
+<span class="n">valid_7_tens</span> <span class="o">=</span> <span class="n">valid_7_tens</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">/</span><span class="mi">255</span>
+<span class="n">valid_3_tens</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">valid_7_tens</span><span class="o">.</span><span class="n">shape</span>
+<span class="n">valid_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">valid_3_tens</span><span class="p">,</span> <span class="n">valid_7_tens</span><span class="p">])</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">)</span>
+<span class="n">valid_y</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">valid_3_tens</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">valid_7_tens</span><span class="p">))</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">valid_dset</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">valid_x</span><span class="p">,</span><span class="n">valid_y</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Loss-Function">
+<a class="anchor" href="#Loss-Function" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loss Function<a class="anchor-link" href="#Loss-Function"> </a>
+</h1>
+<p>We need to improve our weights and biases (w and b) and we do that using gradient descent.  I have a few posts on gradient descent, feel free to check those out if you want details on how it works.  Here we will use the built-in pytorch functionality.</p>
+<p>The first thing we need to use gradient descent is we need a loss function.  Let's use something simple, how far off we were.  If the correct answer was 1, and we predicted a 0.5 that would be a loss of 0.5.</p>
+<p>The one addition is that we will add something called a sigmoid.  All a sigmoid is doing is ensuring that all of our predictions land between 0 and 1.  We never want to predict anything outside of these ranges as those are our 2 categories.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">mnist_loss</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+    
+    <span class="c1"># make all prediction between 0 and 1</span>
+    <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">()</span>
+    
+    <span class="c1"># Difference between predictions and target</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">targets</span><span class="o">==</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="n">predictions</span><span class="p">,</span> <span class="n">predictions</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Gradient-Descent">
+<a class="anchor" href="#Gradient-Descent" aria-hidden="true"><span class="octicon octicon-link"></span></a>Gradient Descent<a class="anchor-link" href="#Gradient-Descent"> </a>
+</h1>
+<h3 id="Background-and-Setup">
+<a class="anchor" href="#Background-and-Setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>Background and Setup<a class="anchor-link" href="#Background-and-Setup"> </a>
+</h3>
+<ul>
+<li>predict</li>
+<li>calculate loss</li>
+<li>calculate gradient</li>
+<li>subtract from weights and bias</li>
+</ul>
+<p>Ok, now we have a function we need to optimize and a loss function to tell us our error.  We are ready for gradient descent.  Let's create a function to change our weights. 
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>If you want more of a background on what is going on here, please take a look at my series on Gradient Descent where I dive deeper on this.  We will be calculating a gradient - which are equivilant to the "Path Value"
+</div>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">linear1</span><span class="p">(</span><span class="n">xb</span><span class="p">):</span> <span class="k">return</span> <span class="n">xb</span><span class="nd">@weights</span> <span class="o">+</span> <span class="n">bias</span>
+
+<span class="c1"># Here is how we will initialize paramaters.  This is just giving me random numbers.</span>
+<span class="k">def</span> <span class="nf">init_params</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">*</span><span class="n">std</span><span class="p">)</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>First, we will make sure our datasets are in a DataLoader.  This is convenience class that helps manage our data and get batches..</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dl</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">valid_dl</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">valid_dset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We are now going to get the first batch out.  We'll use a batch size of 256, but feel free to change that based on your memory.  You can see that we can just simply call first dl, and it creates our shuffled batch for us.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">xb</span><span class="p">,</span><span class="n">yb</span> <span class="o">=</span> <span class="n">first</span><span class="p">(</span><span class="n">dl</span><span class="p">)</span>
+<span class="n">xb</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">yb</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(torch.Size([256, 784]), torch.Size([256, 1]))</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's Initialize our paramaters we will need.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">weights</span> <span class="o">=</span> <span class="n">init_params</span><span class="p">((</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">bias</span> <span class="o">=</span> <span class="n">init_params</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Calculate-the-Gradient">
+<a class="anchor" href="#Calculate-the-Gradient" aria-hidden="true"><span class="octicon octicon-link"></span></a>Calculate the Gradient<a class="anchor-link" href="#Calculate-the-Gradient"> </a>
+</h3>
+<p>We now have our batch of x and y, and we have our weights and biases.  The next step is to make a prediction.  Since our batch size is 256, we see 256x1 tensor.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">preds</span> <span class="o">=</span> <span class="n">linear1</span><span class="p">(</span><span class="n">xb</span><span class="p">)</span>
+<span class="n">preds</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">preds</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(torch.Size([256, 1]), tensor([[-17.7688],
+         [ -3.9593],
+         [ -4.0014],
+         [  1.4874],
+         [  0.5148]], grad_fn=&lt;SliceBackward&gt;))</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we calculate our loss to see how we did.  Probably not well considering all our weights at this point are random.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">loss</span> <span class="o">=</span> <span class="n">mnist_loss</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">yb</span><span class="p">)</span>
+<span class="n">loss</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>tensor(0.5678, grad_fn=&lt;MeanBackward0&gt;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's calculate our Gradients</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="n">weights</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">weights</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="n">bias</span><span class="o">.</span><span class="n">grad</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(torch.Size([784, 1]), tensor(-0.0011), tensor([-0.0071]))</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Since we are going to want to calculate gradients every since step, let's create a function that we can call that does these three steps above.  Let's put all that in a function.  From here on out, we will use this function.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>It’s always a good idea to periodically reviewing and trying to simplify re-usable code.  I reccomend doing following the above approach, make something that works - then simplify.  It often wastes a lot of time trying to write things in the most perfect way from the start.
+</div>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">calc_grad</span><span class="p">(</span><span class="n">xb</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">xb</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">mnist_loss</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">yb</span><span class="p">)</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">calc_grad</span><span class="p">(</span><span class="n">xb</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">linear1</span><span class="p">)</span>
+<span class="n">weights</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="n">bias</span><span class="o">.</span><span class="n">grad</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(tensor(-0.0022), tensor([-0.0142]))</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">weights</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">zero_</span><span class="p">()</span>
+<span class="n">bias</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">zero_</span><span class="p">();</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Training-the-Model">
+<a class="anchor" href="#Training-the-Model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Training the Model<a class="anchor-link" href="#Training-the-Model"> </a>
+</h3>
+<p>Now we are ready to create a function that trains for 1 epoch.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>Epoch is just a fancy way of saying 1 pass through all our data.
+</div>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lr</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">xb</span><span class="p">,</span><span class="n">yb</span> <span class="ow">in</span> <span class="n">dl</span><span class="p">:</span>
+        <span class="n">calc_grad</span><span class="p">(</span><span class="n">xb</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">data</span> <span class="o">-=</span> <span class="n">p</span><span class="o">.</span><span class="n">grad</span><span class="o">*</span><span class="n">lr</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">zero_</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Naturally, we want to be able to measure accuracy.  It's hard for us to gauge how well the model is doing from our loss function.  We will create an accuracy metric to look at accuracy for that batch.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>A loss function is designed to be good for gradient descent.  A Metric is designed to be good for human understanding.  This is why they are different sometimes.
+</div>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">batch_accuracy</span><span class="p">(</span><span class="n">xb</span><span class="p">,</span> <span class="n">yb</span><span class="p">):</span>
+    <span class="n">preds</span> <span class="o">=</span> <span class="n">xb</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">()</span>
+    <span class="n">correct</span> <span class="o">=</span> <span class="p">(</span><span class="n">preds</span><span class="o">&gt;</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">==</span> <span class="n">yb</span>
+    <span class="k">return</span> <span class="n">correct</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">batch_accuracy</span><span class="p">(</span><span class="n">linear1</span><span class="p">(</span><span class="n">xb</span><span class="p">),</span> <span class="n">yb</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>tensor(0.4180)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Looking at accuracy of our batch is great, but we also want to look at our accuracy for the validation set.  This is our way to do that using the accuracy funcion we just defined.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">validate_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">accs</span> <span class="o">=</span> <span class="p">[</span><span class="n">batch_accuracy</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">xb</span><span class="p">),</span> <span class="n">yb</span><span class="p">)</span> <span class="k">for</span> <span class="n">xb</span><span class="p">,</span><span class="n">yb</span> <span class="ow">in</span> <span class="n">valid_dl</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">accs</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="mi">4</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">validate_epoch</span><span class="p">(</span><span class="n">linear1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>0.4138</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Awesome!  Let's throw this all in a loop and see what we get.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="n">weights</span><span class="p">,</span><span class="n">bias</span>
+<span class="n">lr</span> <span class="o">=</span> <span class="mf">1.</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+    <span class="n">train_epoch</span><span class="p">(</span><span class="n">linear1</span><span class="p">,</span> <span class="n">lr</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">validate_epoch</span><span class="p">(</span><span class="n">linear1</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s1">' '</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0.5249 0.6097 0.7038 0.7628 0.8165 0.8439 0.8685 0.8839 0.8922 0.8984 0.9071 0.9097 0.9136 0.9162 0.9176 0.9202 0.9215 0.9267 0.9311 0.9319 </pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Linear-Recap">
+<a class="anchor" href="#Linear-Recap" aria-hidden="true"><span class="octicon octicon-link"></span></a>Linear Recap<a class="anchor-link" href="#Linear-Recap"> </a>
+</h3>
+<p>Lots of stuff, but let's recap really what we did:</p>
+<ul>
+<li>Make a prediction</li>
+<li>Measure how we did</li>
+<li>Change our weights so we do slightly better next time</li>
+<li>Print out accuracy metrics along the way so we can see how we are doing</li>
+</ul>
+<p>This is a huge start, but what we have is a linear model.  Now we need to add non-linearities so that we can have a true Neural Network.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="ReLu">
+<a class="anchor" href="#ReLu" aria-hidden="true"><span class="octicon octicon-link"></span></a>ReLu<a class="anchor-link" href="#ReLu"> </a>
+</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="What-is-it?">
+<a class="anchor" href="#What-is-it?" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is it?<a class="anchor-link" href="#What-is-it?"> </a>
+</h3>
+<p>First, a ReLu is our non-linearity in a neural network.  A neural network is just alternating linear and nonlinear layers.  We defined the Linear layer above, here we will talk about the non-linear ones.  So what exactly does the non-linear layer do?  It's actually much simpler than people like to believe, it's just a max.</p>
+<p>For example, I am going to apply a ReLu to a matrix.</p>
+<p>$\begin{bmatrix}-1&amp;1\\-1&amp;-1\\0&amp;0\\0&amp;1\\1&amp;-1\\1&amp;0\\-1&amp;0\\-1&amp;-1\\1&amp;1\end{bmatrix}$
+$=&gt;$
+$\begin{bmatrix}0&amp;1\\0&amp;0\\0&amp;0\\0&amp;1\\1&amp;0\\1&amp;0\\0&amp;0\\0&amp;0\\1&amp;1\end{bmatrix}$</p>
+<p>As you will see I just took max(x,0).  Another way of saying that is I replaced any negative values with 0.  That's all a ReLu is.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="In-a-Neural-Network">
+<a class="anchor" href="#In-a-Neural-Network" aria-hidden="true"><span class="octicon octicon-link"></span></a>In a Neural Network<a class="anchor-link" href="#In-a-Neural-Network"> </a>
+</h3>
+<p>These ReLus go between our linear layers.  Here's what a simple Neural Net looks like.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># The number 30 here can be adjusted for more a less model complexity.  Future posts will talk more about what that is.</span>
+
+<span class="n">w1</span> <span class="o">=</span> <span class="n">init_params</span><span class="p">((</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">,</span><span class="mi">30</span><span class="p">))</span>
+<span class="n">b1</span> <span class="o">=</span> <span class="n">init_params</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">w2</span> <span class="o">=</span> <span class="n">init_params</span><span class="p">((</span><span class="mi">30</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">b2</span> <span class="o">=</span> <span class="n">init_params</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># This can have more layers by duplicating the patten seen below, this is just the simplest model.</span>
+
+<span class="k">def</span> <span class="nf">simple_net</span><span class="p">(</span><span class="n">xb</span><span class="p">):</span> 
+    <span class="n">res</span> <span class="o">=</span> <span class="n">xb</span><span class="nd">@w1</span> <span class="o">+</span> <span class="n">b1</span> <span class="c1">#Linear</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span> <span class="c1">#ReLu</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="nd">@w2</span> <span class="o">+</span> <span class="n">b2</span> <span class="c1">#Linear</span>
+    <span class="k">return</span> <span class="n">res</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Train-the-Full-Neural-Network">
+<a class="anchor" href="#Train-the-Full-Neural-Network" aria-hidden="true"><span class="octicon octicon-link"></span></a>Train the Full Neural Network<a class="anchor-link" href="#Train-the-Full-Neural-Network"> </a>
+</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>So we have our new model with new weights.  It's more than just the linear model, so how do we use gradient descent?  We now have 4 weights (w1,w2,b1,b2).</p>
+<p>Turns our it's exactly what we already did.  Let's add the new paramaters to our paramsm, and change out the linear model with the simple_net we just defined.  We end up with a pretty decent accuracy!</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">w1</span> <span class="o">=</span> <span class="n">init_params</span><span class="p">((</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">,</span><span class="mi">30</span><span class="p">))</span>
+<span class="n">b1</span> <span class="o">=</span> <span class="n">init_params</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">w2</span> <span class="o">=</span> <span class="n">init_params</span><span class="p">((</span><span class="mi">30</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">b2</span> <span class="o">=</span> <span class="n">init_params</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="n">w1</span><span class="p">,</span><span class="n">b1</span><span class="p">,</span><span class="n">w2</span><span class="p">,</span><span class="n">b2</span>
+<span class="n">lr</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+    <span class="n">train_epoch</span><span class="p">(</span><span class="n">simple_net</span><span class="p">,</span> <span class="n">lr</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">validate_epoch</span><span class="p">(</span><span class="n">simple_net</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s1">' '</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0.6711 0.8028 0.8865 0.9198 0.9245 0.9225 0.9291 0.9223 0.9402 0.9433 0.9343 0.9433 0.9392 0.9392 0.9463 0.9431 0.9476 0.9489 0.9457 0.9528 </pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Recap-of-Tensor-Shapes">
+<a class="anchor" href="#Recap-of-Tensor-Shapes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Recap of Tensor Shapes<a class="anchor-link" href="#Recap-of-Tensor-Shapes"> </a>
+</h1>
+<p>Understanding the shapes of these tensors and how the network works is crucial.  Here's the network we built.  You can see how each layer can fit into the next layer.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">w1</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">b1</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">w2</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">b2</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(torch.Size([709, 784]),
+ torch.Size([784, 30]),
+ torch.Size([30]),
+ torch.Size([30, 1]),
+ torch.Size([1]))</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="/fastblog/images/copied_from_nb/my_icons/simple_net.png" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="What-More?">
+<a class="anchor" href="#What-More?" aria-hidden="true"><span class="octicon octicon-link"></span></a>What More?<a class="anchor-link" href="#What-More?"> </a>
+</h1>
+<p>This is a Neural Network.  Now we can do tweaks to enhance performance.  I will talk about those in future posts, but here's a few concepts.</p>
+<ul>
+<li>Instead of a Linear Layer, A ReLu, then a linear layer - Can we add more layers to have a deeper net?</li>
+<li>What if we average some of the pixels in our image together before dong matrix multiplication (ie a convolutions)?</li>
+<li>Can we randomly ignore pixels to prevent overfitting (ie dropout)?</li>
+</ul>
+<p>There are many 'advanced' variations of Neural Networks, but the concepts are typically along the lines of above.  If you boil them down to what they are really doing - they are pretty simple concepts.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="Isaac-Flath/fastblog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/fastblog/computer%20vision/image%20classification/2020/06/19/NeuralNetworkBasicsP1.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/fastblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/fastblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/fastblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>A personal blog of technical topics relating the machine learning</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://twitter.com/isaac_flath" title="isaac_flath"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
