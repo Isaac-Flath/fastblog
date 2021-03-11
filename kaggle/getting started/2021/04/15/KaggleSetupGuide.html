@@ -299,6 +299,8 @@ window.onload = wrap_img;
 </pre></div>
 <p>That would then be imported using</p>
 <div class="highlight"><pre><span></span><span class="n">learn</span> <span class="o">=</span> <span class="n">load_learner</span><span class="p">(</span><span class="s1">'file:///kaggle/input/fastai/model.pkl'</span><span class="p">)</span>
+<span class="n">dl</span> <span class="o">=</span> <span class="n">learn</span><span class="o">.</span><span class="n">dls</span><span class="o">.</span><span class="n">test_dl</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<span class="n">preds</span> <span class="o">-</span> <span class="n">learn</span><span class="o">.</span><span class="n">get_preds</span><span class="p">(</span><span class="n">dl</span><span class="o">=</span><span class="n">dl</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -316,11 +318,11 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>To download a library you can use <code>pip download</code>.  If you download it to the dataset folder you created, you can update the dataset with the instructions above</p>
+<p>To download a library you can use <code>pip download</code>.  If you download it to the dataset folder you created, you can update the dataset with the instructions above.  We'll download fastai in this example so we can update to the latest version, but the same thing applies with libraries not installed at all in the kernel</p>
 <div class="highlight"><pre><span></span>!pip download fastai -d ./your_dataset/
 </pre></div>
 <p>then you can install in the kaggle kernal like this:</p>
-<div class="highlight"><pre><span></span>!pip install fastai --no-index --find-links<span class="o">=</span>file:///kaggle/input/fastai/<span class="sb">`</span>
+<div class="highlight"><pre><span></span>!pip install -Uqq fastai --no-index --find-links<span class="o">=</span>file:///kaggle/input/your_dataset/
 </pre></div>
 <p>and then import is as normal</p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fastai.vision.all</span> <span class="kn">import</span> <span class="o">*</span>
