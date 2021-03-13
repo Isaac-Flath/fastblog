@@ -13,10 +13,10 @@
   
     
         ,"post1": {
-            "title": "NBDev Minimum Library dasdsa",
-            "content": "I made a very minimal version of nbdev with the intent toward use in one-off projects rather than full featured library. I released to pip for my own use, though I&#39;d take it down if it&#39;s something that fits within NBdev. . I often find myself wishing I could always use the #export tags when coding in notebooks and have any code cells that start with #export just auto-magically be in .py modules. It&#39;s a pain to copy code between multiple notebooks, but it&#39;s also a pain to copy and paste code between modules and notebooks. . NBDev offers an innovative solution and this small library was inspired by it. If you aren&#39;t familiar with NBDev, check it out. NBdev comes out of the box with lots of powerful features such as: . Automated Testing and CI | Automated creation and deployment of documentation site | Automated releases to both conda and pip | Too many more to name | . So why just use NBDev if it&#39;s so awesome? Well sometimes I don&#39;t need all those powerful features listed above. Separate documentation, release to conda and pip, and automated CI means there&#39;s configuration that needs to be filled out. If I am just fiddling with something or working on a one-off project I don&#39;t need a documentation page for that and I am not making something that will ever be released to pip or conda. So that means I don&#39;t need the configuration items and can make something simpler. . Note: Follow me on twitter if you want updates on new blog posts. Ok: Enough jibber-jabber - let&#39;s see how it works! . Minimal Example . Code to be Exported . Let&#39;s start with a code cell that we wouldn&#39;t want exported to a module. This is just to show that when we export it, it doesn&#39;t pick up stuff we do not want . # This doesn&#39;t start with export so it won&#39;t get moved import numpy as np A = np.random.randn(4,3) B = np.sum(A, axis = 1, keepdims = True) B.shape . (4, 1) . Now we&#39;ll define a couple cell that starts with our export flag. This should get picked up and exported .",
-            "url": "https://isaac-flath.github.io/fastblog/nbdev/2021/03/30/NbdevMinimum-Copy1.html",
-            "relUrl": "/nbdev/2021/03/30/NbdevMinimum-Copy1.html",
+            "title": "Nbdevminimum Copy1",
+            "content": "",
+            "url": "https://isaac-flath.github.io/fastblog/2021/03/30/NbdevMinimum-Copy1.html",
+            "relUrl": "/2021/03/30/NbdevMinimum-Copy1.html",
             "date": " • Mar 30, 2021"
         }
         
