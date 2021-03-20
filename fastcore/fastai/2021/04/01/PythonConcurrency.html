@@ -154,13 +154,13 @@ window.onload = wrap_img;
 <li class="toc-entry toc-h3"><a href="#Comparison">Comparison </a></li>
 </ul>
 </li>
+<li class="toc-entry toc-h2"><a href="#Non-CPU-Bound-Task">Non CPU Bound Task </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#The-Data">The Data </a></li>
+<li class="toc-entry toc-h3"><a href="#The-Task">The Task </a></li>
+<li class="toc-entry toc-h3"><a href="#Comparisons">Comparisons </a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h1"><a href="#Non-CPU-Bound-Task">Non CPU Bound Task </a>
-<ul>
-<li class="toc-entry toc-h2"><a href="#The-Data">The Data </a></li>
-<li class="toc-entry toc-h2"><a href="#The-Task">The Task </a></li>
-<li class="toc-entry toc-h2"><a href="#Comparisons">Comparisons </a></li>
 </ul>
 </li>
 <li class="toc-entry toc-h1"><a href="#Processes-vs.-threads">Processes vs. threads </a></li>
@@ -500,9 +500,9 @@ Completion time with process parallelization: 0:00:07.266822
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Non-CPU-Bound-Task">
+<h2 id="Non-CPU-Bound-Task">
 <a class="anchor" href="#Non-CPU-Bound-Task" aria-hidden="true"><span class="octicon octicon-link"></span></a>Non CPU Bound Task<a class="anchor-link" href="#Non-CPU-Bound-Task"> </a>
-</h1>
+</h2>
 <p>In another cooking analogy, imagine you are making hard boiled eggs and rice.  If you are doing 1 after the other how could you speed that up?  Well you could:</p>
 <ol>
 <li>Start boiling the water for the egg</li>
@@ -525,9 +525,9 @@ Completion time with process parallelization: 0:00:07.266822
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="The-Data">
+<h3 id="The-Data">
 <a class="anchor" href="#The-Data" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Data<a class="anchor-link" href="#The-Data"> </a>
-</h2>
+</h3>
 <p>We are going to use IMAGENETTE_320 and download using <a href="https://docs.fast.ai/data.external.html">fastai's external data module</a>.  We have a list of image paths!</p>
 
 </div>
@@ -604,9 +604,9 @@ Thee examples of what's in this list:
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="The-Task">
+<h3 id="The-Task">
 <a class="anchor" href="#The-Task" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Task<a class="anchor-link" href="#The-Task"> </a>
-</h2>
+</h3>
 <p>We are going to load in our images for training.  We will do it in batches of 128.  We aren't doing a full pipeline with augmentation and all that.  All we are doing is reading the images in to see the speed up in that piece.  Let's read in one image and display it to familiarize ourselves with the task.</p>
 
 </div>
@@ -652,9 +652,9 @@ Thee examples of what's in this list:
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Comparisons">
+<h3 id="Comparisons">
 <a class="anchor" href="#Comparisons" aria-hidden="true"><span class="octicon octicon-link"></span></a>Comparisons<a class="anchor-link" href="#Comparisons"> </a>
-</h2>
+</h3>
 <p>Great so let's read the images in for the full dataset in batches of 128.  I told you above that we should use threads for this but I will do all three options so we can compare times.</p>
 <ul>
 <li>
