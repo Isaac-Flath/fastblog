@@ -175,7 +175,7 @@ window.onload = wrap_img;
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Terminology">Terminology<a class="anchor-link" href="#Terminology"> </a></h1><p>Before we go further there's 2 terms we need to understand:</p>
+<h1 id="Terminology">Terminology<a class="anchor-link" href="#Terminology"> </a></h1><p>Before we go further there are 2 terms we need to understand:</p>
 <ul>
 <li><strong>Exploitation:</strong>  This simply means we are going to pick the action we think is best based on the metric</li>
 <li><strong>Exploration:</strong>  This means we are not going to pick the best action, but rather we are going to survey other action.  One particular action may change in effectiveness over time and we want to spend some amount of time exploring so we can stay on top of these changes.</li>
@@ -189,7 +189,7 @@ window.onload = wrap_img;
 <h1 id="The-Minimal-Implementation">The Minimal Implementation<a class="anchor-link" href="#The-Minimal-Implementation"> </a></h1><p>Let's describe what the simplest implementation would look like.  The point of this is to understand the core of what a MAB is.  Once we understand that we can look at all the 'tricks' that are used to make it fit a particular business and work better.</p>
 <p>First we will do 2 things:</p>
 <ol>
-<li>What percent of the time will be be exploiting vs exploring (see terminology section above)</li>
+<li>What percent of the time will be exploiting vs exploring (see terminology section above)</li>
 <li>Calculate metrics for all actions</li>
 </ol>
 <p>Then loop through this repeatedly:</p>
@@ -206,7 +206,7 @@ window.onload = wrap_img;
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Enhancements-&amp;-Customizations">Enhancements &amp; Customizations<a class="anchor-link" href="#Enhancements-&amp;-Customizations"> </a></h1><p>Now that we understand what a MAB is, let's look at how to make it smarter.  Which of these we do is problem dependent, but these are the key ideas to consider</p>
+<h1 id="Enhancements-&amp;-Customizations">Enhancements &amp; Customizations<a class="anchor-link" href="#Enhancements-&amp;-Customizations"> </a></h1><p>Now that we understand what a MAB is, let's look at how to make it smarter.  Which of these we do is problem dependent, but these are the key ideas to consider.</p>
 
 </div>
 </div>
@@ -215,7 +215,7 @@ window.onload = wrap_img;
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="1.-Use-segments">1. Use segments<a class="anchor-link" href="#1.-Use-segments"> </a></h2><p><strong>Rather than calculate metrics over the entire universe of customers.</strong></p>
 <p>Different segments of customers may behave differently.  THe "best" action for 1 group of customers may be different than the "best action" for a different group of customers.  Instead of treating all customers equal, break them into segments so we can personalize actions more.</p>
-<blockquote><p>Example:One sgement could be "people over 65 that live in a cold climate area that has opened at least 1 email in the past"</p>
+<blockquote><p>Example:One segment could be "people over 65 that live in a cold climate area that has opened at least 1 email in the past"</p>
 </blockquote>
 
 </div>
@@ -226,7 +226,7 @@ window.onload = wrap_img;
 <h2 id="2.-Use-smarter-exploration-methods">2. Use smarter exploration methods<a class="anchor-link" href="#2.-Use-smarter-exploration-methods"> </a></h2><p><strong>Rather than picking exploration actions based on random chance use statistics to determine which need more sampling</strong></p>
 <p>The most common 2 methods of defining exploration:</p>
 <ul>
-<li><strong>Thompson Sampling:</strong> Choose best action based on random belief based on the distributions rather than just the metric.  1 action may be better overall, but based on a random sample in the distribution a 'less good' action may be better than a 'best action' based on distribution overlap.  </li>
+<li><strong>Thompson Sampling:</strong> Choose best action based on random belief based on the distributions rather than just the metric.  1 action may be better overall but based on a random sample in the distribution a 'less good' action may be better than a 'best action' based on distribution overlap.  </li>
 <li><strong>Upper Confidence Bound:</strong> Choose based on how confident you are in your measurements.  The is no need to explore a category you have high confidence in (ie very stable with lots of data).</li>
 </ul>
 
@@ -235,7 +235,7 @@ window.onload = wrap_img;
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="3.-Incorporate-business-logic">3. Incorporate business logic<a class="anchor-link" href="#3.-Incorporate-business-logic"> </a></h2><p>There's 2 main places this can be added</p>
+<h2 id="3.-Incorporate-business-logic">3. Incorporate business logic<a class="anchor-link" href="#3.-Incorporate-business-logic"> </a></h2><p>There are 2 main places this can be added</p>
 <h3 id="Action-Selection">Action Selection<a class="anchor-link" href="#Action-Selection"> </a></h3><p>Sometimes not all actions are appropriate or we want to modify the probability an action is selected based on specific customer behavior.  Let's look at a couple examples of how we can weave in business logic.</p>
 
 </div>
@@ -778,7 +778,7 @@ This is where it's important to incorporate human expertise and knowledge of a b
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Conclusion">Conclusion<a class="anchor-link" href="#Conclusion"> </a></h1><p>I hope after reading this post you have an good technical foundation in what a multi-armed bandit is and how to code a very simple one.  I hope in addition to that you understand what are some of the challenges to a succesful implementation and full solution.  I did not code up the more common variations, but with this as a foundation and a little research you now should have all the tools to get started.</p>
+<h1 id="Conclusion">Conclusion<a class="anchor-link" href="#Conclusion"> </a></h1><p>I hope after reading this post you have an good technical foundation in what a multi-armed bandit is and how to code a very simple one.  I hope in addition to that you understand what are some of the challenges to a succesful implementation and full solution.  I did not code up the variations that make this approach more powerful, but with this as a foundation and a little research you now should have all the tools you need to get started.</p>
 
 </div>
 </div>
