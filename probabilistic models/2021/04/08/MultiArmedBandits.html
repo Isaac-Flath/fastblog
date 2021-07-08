@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Multi Armed Bandits | Isaac’s Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Multi Armed Bandits" />
+<meta name="author" content="Isaac Flath" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="How can a Multi Armed Bandit (probalistic model) help me choose the “right” action" />
+<meta property="og:description" content="How can a Multi Armed Bandit (probalistic model) help me choose the “right” action" />
+<link rel="canonical" href="https://isaac-flath.github.io/fastblog/probabilistic%20models/2021/04/08/MultiArmedBandits.html" />
+<meta property="og:url" content="https://isaac-flath.github.io/fastblog/probabilistic%20models/2021/04/08/MultiArmedBandits.html" />
+<meta property="og:site_name" content="Isaac’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-04-08T00:00:00-05:00" />
+<script type="application/ld+json">
+{"url":"https://isaac-flath.github.io/fastblog/probabilistic%20models/2021/04/08/MultiArmedBandits.html","@type":"BlogPosting","headline":"Multi Armed Bandits","dateModified":"2021-04-08T00:00:00-05:00","datePublished":"2021-04-08T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://isaac-flath.github.io/fastblog/probabilistic%20models/2021/04/08/MultiArmedBandits.html"},"author":{"@type":"Person","name":"Isaac Flath"},"description":"How can a Multi Armed Bandit (probalistic model) help me choose the “right” action","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/fastblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://isaac-flath.github.io/fastblog/feed.xml" title="Isaac's Blog" /><link rel="shortcut icon" type="image/x-icon" href="/fastblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/fastblog/">Isaac&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/fastblog/about/">About Me</a><a class="page-link" href="/fastblog/search/">Search</a><a class="page-link" href="/fastblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Multi Armed Bandits</h1><p class="page-description">How can a Multi Armed Bandit (probalistic model) help me choose the "right" action</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-04-08T00:00:00-05:00" itemprop="datePublished">
+        Apr 8, 2021
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Isaac Flath</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      10 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Probabilistic Models">Probabilistic Models</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/Isaac-Flath/fastblog/tree/master/_notebooks/2021-04-08-MultiArmedBandits.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/fastblog/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/Isaac-Flath/fastblog/master?filepath=_notebooks%2F2021-04-08-MultiArmedBandits.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/Isaac-Flath/fastblog/blob/master/_notebooks/2021-04-08-MultiArmedBandits.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2021-04-08-MultiArmedBandits.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Background:</strong>  Multi Armed Bandits (MAB) are a method of choosing the best action from a bunch of options.  In order to choose the best action there are several problems to solve.  These are:</p>
+<ol>
+<li>How do you know what action is "best"?</li>
+<li>What if the "best" action changes over time?  How do you know it's changed?</li>
+<li>How do I balance choosing the best action with collecting new information?</li>
+</ol>
+<p><strong>Purpose:</strong>  The purpose of this post is to explain what a Multi Armed Bandit (MAB) is, and how it solves those problems.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="MAB-Setup-Requirements">MAB Setup Requirements<a class="anchor-link" href="#MAB-Setup-Requirements"> </a></h1><p>In it's essence, MAB is just A/B testing in an intelligent and automated way.  Because it is like A/B testing it has very similar requirements for setup, but because it is automated it often requires defining these items with a bit more precision.  Let's start with what we need to have before we can use a MAB.</p>
+<p><strong>Things to Define</strong> The things needed to set up new actions are the same as needed to set up an A/B test:</p>
+<ol>
+<li>What the action is (ie send an email)</li>
+<li>When selected, what should be done (ie use x template to send automated email to y customer)</li>
+<li>What is the success criteria</li>
+<li>What is the metric</li>
+</ol>
+<p>Most of the above is business information that business stakeholders decide in conjunction with technical teams.  The tricky piece is <strong>all metrics must be comparable to each other</strong>.  This is easy if it's all emails and you just want to measure click through rate, but sometimes comparisons are harder.  A common approach is to <strong>define each of these in terms of dollars</strong> (if possible).</p>
+<blockquote><p>Example:Which is better: A 10% click through email rate, or 2% phone answering rate?  Without defining it in terms of dollars (profit or revenue), how do you know which is better for the business?</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Terminology">Terminology<a class="anchor-link" href="#Terminology"> </a></h1><p>Before we go further there's 2 terms we need to understand:</p>
+<ul>
+<li><strong>Exploitation:</strong>  This simply means we are going to pick the action we think is best based on the metric</li>
+<li><strong>Exploration:</strong>  This means we are not going to pick the best action, but rather we are going to survey other action.  One particular action may change in effectiveness over time and we want to spend some amount of time exploring so we can stay on top of these changes.</li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="The-Minimal-Implementation">The Minimal Implementation<a class="anchor-link" href="#The-Minimal-Implementation"> </a></h1><p>Let's describe what the simplest implementation would look like.  The point of this is to understand the core of what a MAB is.  Once we understand that we can look at all the 'tricks' that are used to make it fit a particular business and work better.</p>
+<p>First we will do 2 things:</p>
+<ol>
+<li>What percent of the time will be be exploiting vs exploring (see terminology section above)</li>
+<li>Calculate metrics for all actions</li>
+</ol>
+<p>Then loop through this repeatedly:</p>
+<ol>
+<li>Pick action (Using probability to define whether we are exploiting or exploring)</li>
+<li>Update data with results when available</li>
+<li>Recalculate metrics using new data</li>
+<li>Repeat</li>
+</ol>
+<p>This is the simplest MAB we can create.  Let's look at what we need to do to make it 'smarter' and fit a business.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Enhancements-&amp;-Customizations">Enhancements &amp; Customizations<a class="anchor-link" href="#Enhancements-&amp;-Customizations"> </a></h1><p>Now that we understand what a MAB is, let's look at how to make it smarter.  Which of these we do is problem dependent, but these are the key ideas to consider</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="1.-Use-segments">1. Use segments<a class="anchor-link" href="#1.-Use-segments"> </a></h2><p><strong>Rather than calculate metrics over the entire universe of customers.</strong></p>
+<p>Different segments of customers may behave differently.  THe "best" action for 1 group of customers may be different than the "best action" for a different group of customers.  Instead of treating all customers equal, break them into segments so we can personalize actions more.</p>
+<blockquote><p>Example:One sgement could be "people over 65 that live in a cold climate area that has opened at least 1 email in the past"</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="2.-Use-smarter-exploration-methods">2. Use smarter exploration methods<a class="anchor-link" href="#2.-Use-smarter-exploration-methods"> </a></h2><p><strong>Rather than picking exploration actions based on random chance use statistics to determine which need more sampling</strong></p>
+<p>The most common 2 methods of defining exploration:</p>
+<ul>
+<li><strong>Thompson Sampling:</strong> Choose best action based on random belief based on the distributions rather than just the metric.  1 action may be better overall, but based on a random sample in the distribution a 'less good' action may be better than a 'best action' based on distribution overlap.  </li>
+<li><strong>Upper Confidence Bound:</strong> Choose based on how confident you are in your measurements.  The is no need to explore a category you have high confidence in (ie very stable with lots of data).</li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="3.-Incorporate-business-logic">3. Incorporate business logic<a class="anchor-link" href="#3.-Incorporate-business-logic"> </a></h2><p>There's 2 main places this can be added</p>
+<h3 id="Action-Selection">Action Selection<a class="anchor-link" href="#Action-Selection"> </a></h3><p>Sometimes not all actions are appropriate or we want to modify the probability an action is selected based on specific customer behavior.  Let's look at a couple examples of how we can weave in business logic.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p>Example:If no phone number on file all actions related to email cannot be selected
+This is the simplest example of a business rule.  It could be that overall sending an email is the best action for customers, but we wouldn't want to choose an email action if we have no way to reach out to them.</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p>Example:If have customer has not answered the last 10 phone calls, reduce call action probabilities by 10%
+This is a simple example.  Making a phone call may be the best way overall to make a sale, but we have information on this specific customer that they do not answer the phone.  We may still want to try on occassion, but less often for this specific customer.</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<blockquote><p>Example:If a customer has bought X products before, remove Y offer from consideration
+This is where it's important to incorporate human expertise and knowledge of a business in.  The best technical solutions don't ignore human expertise, but rather enhance human expertise and help scale that expertise to more customers.</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Action-Execution">Action Execution<a class="anchor-link" href="#Action-Execution"> </a></h3><p>You can have some generic actions such as "Send Offer Email" and insert business logic there.  For example "Send Offer Email" may send template 1 with cruise destinations for landlocked states or template 2 with resort destinations for people in ocean border states.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="4.-Deep-Learning">4. Deep Learning<a class="anchor-link" href="#4.-Deep-Learning"> </a></h2><p>This is rarely the best starting point and requires a great deal of expertise.  Rather than picking actions based on metric you could pick an action based on predicted outcomes using an output of NN (meaning NN needs to be updated in real time).</p>
+<p>Using deep learning can often improve accuracy quite a bit, but it comes with a lot of negatives as well.</p>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Increased accuracy</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Harder to change, add, and remove actions</li>
+<li>Less "Interpretable", meaning it is harder to understand rationale behind what/why certain actions are considered "best"</li>
+<li>Much longer to set up and much harder to maintain over time</li>
+<li>Higher risk of hidden biases</li>
+</ul>
+<p>Think carefully before going this route!  Using deep learning for this is an incredibly powerful approach in the right situations, but those situations are not as common as many people believe.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Code-it-up!">Code it up!<a class="anchor-link" href="#Code-it-up!"> </a></h1><p>Here we will code the simplest example so we can see a skeleton of how it works and get you started on the path of implementing one for your use-case.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span> 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span><span class="o">,</span> <span class="nn">statistics</span><span class="o">,</span> <span class="nn">random</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>First let's load and take a look at our data.  The dataset we will be using is website latencies.  We want to pick the website at each given moment with the lowest latency.
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>This dataset is easy because it&#8217;s very easy to have comparable metrics.  We don&#8217;t have to worry about comparing phone calls to emails, we have the same universal metric for each action.
+</div></p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;univ-latencies/univ-latencies.txt&#39;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>acu-edu</th>
+      <th>acadiau-ca</th>
+      <th>adrian-edu</th>
+      <th>agnesscott-edu</th>
+      <th>aims-edu</th>
+      <th>uni-freiburg-de</th>
+      <th>alfred-edu</th>
+      <th>alvernia-edu</th>
+      <th>alverno-edu</th>
+      <th>american-edu</th>
+      <th>...</th>
+      <th>williams-edu</th>
+      <th>wsc-nodak-edu</th>
+      <th>winona-msus-edu</th>
+      <th>wpi-edu</th>
+      <th>wright-edu</th>
+      <th>yale-edu</th>
+      <th>yu-edu</th>
+      <th>yorku-ca</th>
+      <th>upenn-edu</th>
+      <th>ens-fr</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>396</td>
+      <td>381</td>
+      <td>488</td>
+      <td>506</td>
+      <td>333</td>
+      <td>1327</td>
+      <td>132</td>
+      <td>70</td>
+      <td>456</td>
+      <td>121</td>
+      <td>...</td>
+      <td>220</td>
+      <td>1898</td>
+      <td>434</td>
+      <td>125</td>
+      <td>304</td>
+      <td>94</td>
+      <td>460</td>
+      <td>347</td>
+      <td>532</td>
+      <td>429</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>271</td>
+      <td>261</td>
+      <td>488</td>
+      <td>504</td>
+      <td>276</td>
+      <td>1084</td>
+      <td>89</td>
+      <td>23</td>
+      <td>409</td>
+      <td>34</td>
+      <td>...</td>
+      <td>263</td>
+      <td>1032</td>
+      <td>294</td>
+      <td>74</td>
+      <td>269</td>
+      <td>252</td>
+      <td>98</td>
+      <td>265</td>
+      <td>233</td>
+      <td>293</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>271</td>
+      <td>141</td>
+      <td>325</td>
+      <td>545</td>
+      <td>266</td>
+      <td>1078</td>
+      <td>86</td>
+      <td>27</td>
+      <td>837</td>
+      <td>33</td>
+      <td>...</td>
+      <td>409</td>
+      <td>891</td>
+      <td>292</td>
+      <td>77</td>
+      <td>288</td>
+      <td>41</td>
+      <td>78</td>
+      <td>261</td>
+      <td>114</td>
+      <td>300</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>268</td>
+      <td>136</td>
+      <td>324</td>
+      <td>1946</td>
+      <td>331</td>
+      <td>1342</td>
+      <td>88</td>
+      <td>24</td>
+      <td>531</td>
+      <td>35</td>
+      <td>...</td>
+      <td>361</td>
+      <td>421</td>
+      <td>298</td>
+      <td>76</td>
+      <td>228</td>
+      <td>42</td>
+      <td>153</td>
+      <td>266</td>
+      <td>322</td>
+      <td>532</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>273</td>
+      <td>136</td>
+      <td>321</td>
+      <td>549</td>
+      <td>290</td>
+      <td>1192</td>
+      <td>143</td>
+      <td>26</td>
+      <td>434</td>
+      <td>32</td>
+      <td>...</td>
+      <td>982</td>
+      <td>522</td>
+      <td>296</td>
+      <td>73</td>
+      <td>764</td>
+      <td>41</td>
+      <td>98</td>
+      <td>262</td>
+      <td>234</td>
+      <td>271</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 760 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>So first, we need to define out metrics and how we will update the metrics.  As new data comes in we need to always keep track of the data so we can determine which is the best action and which we need to explore periodically.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Metrics</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">update_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;calculate the metrics for each action&#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1"># Reset metrics</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="c1"># For each action</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="c1"># average the latencies for our metric</span>
+      
+    <span class="k">def</span> <span class="nf">add_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">series</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">series</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="c1"># for each action</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="c1"># Append the new data </span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">7</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># only keep last 7 values - older data is no longer relevant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_metrics</span><span class="p">()</span> <span class="c1"># Update metrics using recent data</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Next, we need the actual Multi-Armed Bandit that can select actions based on the metrics the previous class calculates.  Let's build this now.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">MAB</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">exploration_prob</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exploration_prob</span> <span class="o">=</span> <span class="n">exploration_prob</span> <span class="c1"># User defined</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actions</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;action&#39;</span><span class="p">,</span><span class="s1">&#39;latency&#39;</span><span class="p">,</span><span class="s1">&#39;min_latency&#39;</span><span class="p">,</span><span class="s1">&#39;regret&#39;</span><span class="p">])</span>
+    
+    <span class="k">def</span> <span class="nf">perform_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">m</span><span class="p">):</span>
+        
+        <span class="c1"># Identify the &quot;best&quot; action based on the smallest average latency</span>
+        <span class="n">ideal_action</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">get</span><span class="p">)</span> 
+        
+        <span class="c1"># Based on exploration probabiliity choose either random exploration or choose the &quot;best action&quot;</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">exploration_prob</span><span class="p">:</span> <span class="n">action</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">action</span> <span class="o">=</span> <span class="n">ideal_action</span>
+            
+        <span class="c1"># Store results</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">mab</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">idx</span><span class="p">):</span> <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">action</span><span class="p">,</span><span class="n">m</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="n">action</span><span class="p">],</span><span class="n">m</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="n">ideal_action</span><span class="p">],</span><span class="n">m</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="n">action</span><span class="p">]</span><span class="o">-</span><span class="n">m</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="n">ideal_action</span><span class="p">]]</span>
+    
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can now use those to run through the entire dataset and choose actions.  Regret measures the difference between the latency we chose and the latency of the best choice, which helps us understand the cost of our exploration.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">Metrics</span><span class="p">()</span> <span class="c1"># Initialize Metrics</span>
+<span class="n">mab</span> <span class="o">=</span> <span class="n">MAB</span><span class="p">(</span><span class="mf">0.15</span><span class="p">)</span> <span class="c1"># Initionalize our MAB with a 15% exploration probabilty</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)):</span> <span class="c1"># for each point in time</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">series</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="c1"># Add Data</span>
+    <span class="n">mab</span><span class="o">.</span><span class="n">perform_action</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="c1"># Select an action and calculate results</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>When we look at the results we see that the "best" action is not always the same but we are pretty good about selecting the best action anyway.  We do this by sampling options to monitor how all the actions change over time through constant exploration (15% of the time).  The regret column measures the difference between the latency of the option we selected and the ideal option which we can use to measure and tune the cost of our exploration.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">mab</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>action</th>
+      <th>latency</th>
+      <th>min_latency</th>
+      <th>regret</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>502</th>
+      <td>uoregon-edu</td>
+      <td>417</td>
+      <td>17</td>
+      <td>400</td>
+    </tr>
+    <tr>
+      <th>698</th>
+      <td>pace-edu</td>
+      <td>17</td>
+      <td>17</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>808</th>
+      <td>fitnyc-edu</td>
+      <td>13</td>
+      <td>13</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>954</th>
+      <td>fitnyc-edu</td>
+      <td>10</td>
+      <td>10</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>81</th>
+      <td>stjohns-edu</td>
+      <td>17</td>
+      <td>17</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>947</th>
+      <td>fitnyc-edu</td>
+      <td>10</td>
+      <td>10</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>wcupa-edu</td>
+      <td>15</td>
+      <td>15</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>604</th>
+      <td>cmu-edu</td>
+      <td>70</td>
+      <td>18</td>
+      <td>52</td>
+    </tr>
+    <tr>
+      <th>573</th>
+      <td>pace-edu</td>
+      <td>18</td>
+      <td>18</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>920</th>
+      <td>fitnyc-edu</td>
+      <td>11</td>
+      <td>11</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Conclusion">Conclusion<a class="anchor-link" href="#Conclusion"> </a></h1><p>I hope after reading this post you have an good technical foundation in what a multi-armed bandit is and how to code a very simple one.  I hope in addition to that you understand what are some of the challenges to a succesful implementation and full solution.  I did not code up the more common variations, but with this as a foundation and a little research you now should have all the tools to get started.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="Isaac-Flath/fastblog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/fastblog/probabilistic%20models/2021/04/08/MultiArmedBandits.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/fastblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/fastblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/fastblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>A personal blog of technical topics relating the machine learning</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://twitter.com/isaac_flath" title="isaac_flath"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
