@@ -1,0 +1,20 @@
+----------------------------------------------
+-        Multi-armed bandit dataset:         -
+- Universities home page retrieval latencies -
+----------------------------------------------
+
+Date: 2004-06-04
+Author: Joannes Vermorel (joannes@vermorel.com)
+
+The dataset is this package corresponds to the retrieval latencies 
+of more than 700 universities homepages. The pages have been probed 
+every 10mins for more than one week in May 2004 from an internet 
+connection located in New York, NY, USA.
+
+The data is comma separated. The URLs are indicated in the first line.
+The latencies value are expressed in millisecond. The data includes
+760 URLs and 1361 latencies per URL.
+
+The initial purpose of this dataset was to be used as a
+benchmarking dataset for the multi-armed bandit problem.
+This dataset is released under public domain license.
