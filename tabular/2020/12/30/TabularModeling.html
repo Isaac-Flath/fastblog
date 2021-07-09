@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Tabular Modeling | Isaac’s Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Tabular Modeling" />
+<meta name="author" content="Isaac Flath" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="My process for how I approach Tabular Modling" />
+<meta property="og:description" content="My process for how I approach Tabular Modling" />
+<link rel="canonical" href="https://isaac-flath.github.io/fastblog/tabular/2020/12/30/TabularModeling.html" />
+<meta property="og:url" content="https://isaac-flath.github.io/fastblog/tabular/2020/12/30/TabularModeling.html" />
+<meta property="og:site_name" content="Isaac’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-12-30T00:00:00-06:00" />
+<script type="application/ld+json">
+{"url":"https://isaac-flath.github.io/fastblog/tabular/2020/12/30/TabularModeling.html","@type":"BlogPosting","headline":"Tabular Modeling","dateModified":"2020-12-30T00:00:00-06:00","datePublished":"2020-12-30T00:00:00-06:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://isaac-flath.github.io/fastblog/tabular/2020/12/30/TabularModeling.html"},"author":{"@type":"Person","name":"Isaac Flath"},"description":"My process for how I approach Tabular Modling","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/fastblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://isaac-flath.github.io/fastblog/feed.xml" title="Isaac's Blog" /><link rel="shortcut icon" type="image/x-icon" href="/fastblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/fastblog/">Isaac&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/fastblog/about/">About Me</a><a class="page-link" href="/fastblog/search/">Search</a><a class="page-link" href="/fastblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Tabular Modeling</h1><p class="page-description">My process for how I approach Tabular Modling</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-12-30T00:00:00-06:00" itemprop="datePublished">
+        Dec 30, 2020
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Isaac Flath</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      10 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Tabular">Tabular</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/Isaac-Flath/fastblog/tree/master/_notebooks/2020-12-30-TabularModeling.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/fastblog/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/Isaac-Flath/fastblog/master?filepath=_notebooks%2F2020-12-30-TabularModeling.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/Isaac-Flath/fastblog/blob/master/_notebooks/2020-12-30-TabularModeling.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Project-Structure">Project Structure </a></li>
+<li class="toc-entry toc-h1"><a href="#Baseline-Models">Baseline Models </a></li>
+<li class="toc-entry toc-h1"><a href="#Preliminary-EDA">Preliminary EDA </a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#Hierarchical-Clustering">Hierarchical Clustering </a></li>
+<li class="toc-entry toc-h2"><a href="#Standard-Correlation-Matrices">Standard Correlation Matrices </a></li>
+<li class="toc-entry toc-h2"><a href="#Null-Value-Analysis">Null Value Analysis </a></li>
+<li class="toc-entry toc-h2"><a href="#Understanding-Hierarchies">Understanding Hierarchies </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Predictive-EDA">Predictive EDA </a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#Feature-Importance">Feature Importance </a></li>
+<li class="toc-entry toc-h2"><a href="#Time-Consistency">Time Consistency </a></li>
+<li class="toc-entry toc-h2"><a href="#Column-sort-order">Column sort order </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Model-Construction">Model Construction </a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#Feature-Engineering:">Feature Engineering: </a></li>
+<li class="toc-entry toc-h2"><a href="#Model-Architecture:--Random-Forest,-XGB,-NN">Model Architecture:  Random Forest, XGB, NN </a></li>
+<li class="toc-entry toc-h2"><a href="#Categorical-encoding">Categorical encoding </a></li>
+<li class="toc-entry toc-h2"><a href="#Class-imbalance">Class imbalance </a></li>
+<li class="toc-entry toc-h2"><a href="#Ensemble-Approaches:--Try-a-few-ensemble-approaches.">Ensemble Approaches:  Try a few ensemble approaches. </a></li>
+<li class="toc-entry toc-h2"><a href="#Model-Tuning">Model Tuning </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Model-EDA">Model EDA </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2020-12-30-TabularModeling.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Background:</strong>  The most common type of data in most organizations is tabular data stored in a SQL database.  Tabular is also a great thing to model with because it's often already structured in a database and in a good format to start working with.  The uses for tabular data range from recommendation engines, to marketing action prediction, to churn prediction, predicting fraud, and much more.</p>
+<p><strong>Purpose:</strong> The purpose of this post is to walk through the things I think about for every tabular modeling problem.  I may not use every technique for every problem, and there are others that I may use on occasion - but these core ones should always be at least considered carefully (in my opinion)</p>
+<p><strong>Assumptions:</strong> In this guide I am assuming you have experience building tabular models in the past and are able to look up these techniques on your own.  This will offer brief descriptions of what things are and why they are important, but won't go into the level of depth needed in this post to implement these ideas.</p>
+<p><strong>What's missing from this post:</strong>  Modeling is only a small piece of the puzzle.  I am not covering how to define a problem, how to do ETL processes, how to deploy and productionalize things, how to communicate to the organization so it can be used, how to build processes around it so people can leverage your model, etc..  This is only covering the modeling portion.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Project-Structure">
+<a class="anchor" href="#Project-Structure" aria-hidden="true"><span class="octicon octicon-link"></span></a>Project Structure<a class="anchor-link" href="#Project-Structure"> </a>
+</h1>
+<p>There are 5 main phases to a tabular modeling project.  Each serves it's own role.</p>
+<ul>
+<li><strong>Baseline Models</strong></li>
+<li><strong>Preliminary EDA</strong></li>
+<li><strong>Predictive EDA</strong></li>
+<li><strong>Model Construction</strong></li>
+<li><strong>Mode Evaluation</strong></li>
+</ul>
+<p>The one thing that is common in <strong>EVERY</strong> phase is you should be constantly iterating.  Every time you learn something add it to your model and try it.  Experiment with the actual model.  A big mistake that people often make is building lots and lots of stuff and then trying to put it all together at the end.  You should be doing small micro adjustments to your model frequently and running experiments constantly.</p>
+<p>That said: The remainder of this post will walk through each of those phases.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Baseline-Models">
+<a class="anchor" href="#Baseline-Models" aria-hidden="true"><span class="octicon octicon-link"></span></a>Baseline Models<a class="anchor-link" href="#Baseline-Models"> </a>
+</h1>
+<blockquote>
+<p><strong>Goal:Validate you've created and loaded the dataset properly.  Verify that what you are predicting can be predicted and understand the difficulty of the problem.  Verify there's no obvious data leakage.</strong>
+In this phase we are making baseline models.  The more complex the problem is the more important this is.  Get an idea of the distribution of the labels.  What would your accuracy be if you predicted the dominant class all the time?  How good is just predicting the average value?  You can build these as formal models or if it's simple enough looking at the distribution.</p>
+</blockquote>
+<p>From there we add a bit of complexity as we start to iterate.  You can move to a linear regression, logistic regression, random forest, or something else that is easy to train and set up.  Keep an eye on your metrics and look for things that are "too good to be true".  If you're getting a really high score in these early phases you should verify that you don't have a data leakage problem.  You do want to make sure you are doing better than just predicting the most common label.  If a simple model isn't better than that, a super advance complex model probably wont help either.</p>
+<p>During this step you should also be verifying that you have created and loaded the dataset properly (including train/valid/test splits).  Do not just assume previous steps were done correctly.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Preliminary-EDA">
+<a class="anchor" href="#Preliminary-EDA" aria-hidden="true"><span class="octicon octicon-link"></span></a>Preliminary EDA<a class="anchor-link" href="#Preliminary-EDA"> </a>
+</h1>
+<blockquote>
+<p><strong>Goal:Identify a smaller set of columns to start working with.</strong>
+The goal of this phase is to narrow the search.  Other than the obvious reasons of focusing time on higher value items, it also is important for determining feature importance later.</p>
+</blockquote>
+<p>In the Preliminary EDA phase there's 4 main things I look at.</p>
+<ol>
+<li>Hierarchical clustering</li>
+<li>Standard correlation matrices</li>
+<li>Null Value Analysis</li>
+<li>Understanding hierarchies</li>
+</ol>
+<h2 id="Hierarchical-Clustering">
+<a class="anchor" href="#Hierarchical-Clustering" aria-hidden="true"><span class="octicon octicon-link"></span></a>Hierarchical Clustering<a class="anchor-link" href="#Hierarchical-Clustering"> </a>
+</h2>
+<p><strong>Are any of these columns in the same sort order (regardless of scale or actual values)?</strong></p>
+<p>Hierarchical clustering is underused and very valuable.  Tree based models (RF, XGboost, Catboost, etc) do not care about scale, just sort order.  A decision tree treats [1,2,3] the same as [1,20,300].  Because of that doing hierarchical clustering can help identify variables that are very similar for the purposes of modeling and is a powerful tool.  Instead of doing the clustering you could just do a spearman rank correlation matrix, which is the foundation for the hierarchical clustering.</p>
+<h2 id="Standard-Correlation-Matrices">
+<a class="anchor" href="#Standard-Correlation-Matrices" aria-hidden="true"><span class="octicon octicon-link"></span></a>Standard Correlation Matrices<a class="anchor-link" href="#Standard-Correlation-Matrices"> </a>
+</h2>
+<p><strong>Are any of these columns really highly correlated with other features and can be thrown out?</strong></p>
+<p>Standard Correlation Matrices can be helpful as a secondary tool to identify similar columns</p>
+<h2 id="Null-Value-Analysis">
+<a class="anchor" href="#Null-Value-Analysis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Null Value Analysis<a class="anchor-link" href="#Null-Value-Analysis"> </a>
+</h2>
+<p><strong>Are there patterns of null values where several columns are all always null as the same times?</strong></p>
+<p>Analyzing where Null Values appear can be helpful in understanding how data was gathered or how processes effect the data.  There also may be groups of columns that are always null at the same time and you can avoid having null columns for each column and just have 1 for the set.</p>
+<h2 id="Understanding-Hierarchies">
+<a class="anchor" href="#Understanding-Hierarchies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Understanding Hierarchies<a class="anchor-link" href="#Understanding-Hierarchies"> </a>
+</h2>
+<p>Giving careful thought to what a unique record is and understanding hierarchies is important?  Often there may be product hierarchies, or account hierarchies, or billing hierarchies to be aware of.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Predictive-EDA">
+<a class="anchor" href="#Predictive-EDA" aria-hidden="true"><span class="octicon octicon-link"></span></a>Predictive EDA<a class="anchor-link" href="#Predictive-EDA"> </a>
+</h1>
+<blockquote>
+<p><strong>Goal:Look at features in relation to predictive power and the dependent variable to further understand features.</strong>
+In the Predictive EDA phase I look at three things:</p>
+<ol>
+<li>Feature Importance</li>
+<li>Time Consistency</li>
+<li>Columns sort order</li>
+</ol>
+</blockquote>
+<h2 id="Feature-Importance">
+<a class="anchor" href="#Feature-Importance" aria-hidden="true"><span class="octicon octicon-link"></span></a>Feature Importance<a class="anchor-link" href="#Feature-Importance"> </a>
+</h2>
+<p><strong>When building a model of remaining features, which features are most important?  Are there any that are not important?</strong></p>
+<p>This is where we do our feature importance.  It's important to get rid of as many redundant features as possible before doing feature importance because having redundant features skews feature importance.  If there are 10 identical columns, then they each show as 1/10 the predictive power as any of the individual column.  You could easily filter then all out thinking none are important, when in reality you should have filtered 9 of them out.  The hierarchical Clustering in the previous section removes these redundancies.</p>
+<p>Once you have the most important features you need to do a few things.  First, learn as much as you can about those columns.  How is data collected?  How is data updated?  Is there any data leakage?  What's the distribution?  What's the significance to the business?  The more you can learn about these important features the better.</p>
+<p>If features are very unimportant you can cut them.  Simply choose an importance threshold, cut the features and measure performance of the model.  If the model still performs well then those features were not crucial.</p>
+<h2 id="Time-Consistency">
+<a class="anchor" href="#Time-Consistency" aria-hidden="true"><span class="octicon octicon-link"></span></a>Time Consistency<a class="anchor-link" href="#Time-Consistency"> </a>
+</h2>
+<p><strong>How consistent is the predictive power of a feature over time?</strong></p>
+<p>Measuring time consistency is an absolute necessity.  We are training on data to predict future data - and in production we will be predicting data even further in the future.  If features are unstable over time we need to be aware of that, and there's a good chance we can't use those features reliably.</p>
+<p>To measure this you can build a 1 feature model to predict the dependent variable and see if predictive power remains constant over time for that feature.  You can then go to 2 feature models and do the same thing.  If features are extremely predictive for a few months and then not other months, your model will need some way to determine when to rely on that and when not to.  Sometimes it's in the months close to a contract start/end date but often it's just a feature we have to throw away.</p>
+<h2 id="Column-sort-order">
+<a class="anchor" href="#Column-sort-order" aria-hidden="true"><span class="octicon octicon-link"></span></a>Column sort order<a class="anchor-link" href="#Column-sort-order"> </a>
+</h2>
+<p><strong>How does the order in which we evaluate columns matter?  If we have 2 highly correlated columns, does it matter which we choose to keep?</strong></p>
+<p>Earlier we threw away columns that were correlated to only keep 1.  In this step you can do tests to identify which should be thrown away.  If 2 columns are correlated and you threw 1 of them out, was that the right choice or should you have thrown the other out?</p>
+<p>This often doesn't make a huge difference but it does sometimes so it is worth considering.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Model-Construction">
+<a class="anchor" href="#Model-Construction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Model Construction<a class="anchor-link" href="#Model-Construction"> </a>
+</h1>
+<blockquote>
+<p><strong>Goal:Take our model and everything we have learned and put it together into a final model</strong>
+This is constructing the final model using everything we knew previously.  There are a lot of components.  I will touch on a few of the most critical ones.</p>
+</blockquote>
+<h2 id="Feature-Engineering:">
+<a class="anchor" href="#Feature-Engineering:" aria-hidden="true"><span class="octicon octicon-link"></span></a>Feature Engineering:<a class="anchor-link" href="#Feature-Engineering:"> </a>
+</h2>
+<p><strong>How can we engineer and encode features to improve feature importance and/or time consistency?</strong></p>
+<p>I wish there was great universal guidance here, but it's very domain specific.  Try an idea, measure validation performance keep if it helps.  Graph and visualize as much as you can and keep trying new ideas.</p>
+<h2 id="Model-Architecture:--Random-Forest,-XGB,-NN">
+<a class="anchor" href="#Model-Architecture:--Random-Forest,-XGB,-NN" aria-hidden="true"><span class="octicon octicon-link"></span></a>Model Architecture:  Random Forest, XGB, NN<a class="anchor-link" href="#Model-Architecture:--Random-Forest,-XGB,-NN"> </a>
+</h2>
+<p>Considering architecture is important.  For most supervised tabular modeling you will want a Random Forest, XGBoost, or a Neural Network.  Random Forest is the simplest.  It is fairly accurate, fast to train and hard to screw up.  It's also the model with the more interpretability so if explainability is important this can be a good option.</p>
+<p>XGboost often gives a performance boost, but it is more sensitive to hyperparameters and overfitting so it will take a bit longer to get it tuned properly.</p>
+<p>A Neural Network when tuned properly in my experience offers a slight performance boost over XGboost (there's a big debate on this).  I think it'd be very rare for the lift you get to be meaningful and worth the added complexity and loss of explainability.</p>
+<h2 id="Categorical-encoding">
+<a class="anchor" href="#Categorical-encoding" aria-hidden="true"><span class="octicon octicon-link"></span></a>Categorical encoding<a class="anchor-link" href="#Categorical-encoding"> </a>
+</h2>
+<p>The main ways to encode categorical variables are label, order, target encoding, count, and catboost.  I won't cover what each of them are, but try encoding things in different ways and see if it helps!</p>
+<h2 id="Class-imbalance">
+<a class="anchor" href="#Class-imbalance" aria-hidden="true"><span class="octicon octicon-link"></span></a>Class imbalance<a class="anchor-link" href="#Class-imbalance"> </a>
+</h2>
+<p>Most problems in the real world I have run into have a class imbalance.  For example predicting customer churn there are way more customers staying than churning (hopefully).  Churn may account for 2% of the base.  There's several things that can be done to address this, the most common approaches are using a weighted loss or over/under sampling.</p>
+<p>In Class imbalance problems it is also important that you have a good metric.  I am not discussing metrics here because the metric should have been defined before the dataset was even created.</p>
+<h2 id="Ensemble-Approaches:--Try-a-few-ensemble-approaches.">
+<a class="anchor" href="#Ensemble-Approaches:--Try-a-few-ensemble-approaches." aria-hidden="true"><span class="octicon octicon-link"></span></a>Ensemble Approaches:  Try a few ensemble approaches.<a class="anchor-link" href="#Ensemble-Approaches:--Try-a-few-ensemble-approaches."> </a>
+</h2>
+<p>Ensembling is common, but often it's not neccesary.  You can try cross-folding, but in most practical settings I have found the added complexity at inference time is not worth it.  I have seen success ensembling different architecture (ie a Random Forest + an XGBoost)</p>
+<h2 id="Model-Tuning">
+<a class="anchor" href="#Model-Tuning" aria-hidden="true"><span class="octicon octicon-link"></span></a>Model Tuning<a class="anchor-link" href="#Model-Tuning"> </a>
+</h2>
+<p>Model tuning is really important and most libraries have a built in tuning framework.  You will need to set hyperparameter ranges to try and run tests with different features.  There are many guides to fine tune a model - I will do a future post on how I approach tuning.  Often a grid search is sufficient, but for XGBoosts I often use Bayesian Optimization with HYPEROPT.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Model-EDA">
+<a class="anchor" href="#Model-EDA" aria-hidden="true"><span class="octicon octicon-link"></span></a>Model EDA<a class="anchor-link" href="#Model-EDA"> </a>
+</h1>
+<p>The goal of this phase is to build a model with what we found out in the first 2 and look to understand the model more deeply.  Hopefully this understanding can lead to us iterating and improving out model.  We may revisit any or all of previous steps as we explore.</p>
+<p>This phase we do a lot of <a href="https://isaac-flath.github.io/fastblog/tabular/data%20exploration/2020/11/20/PartialDependencePlotting.html">Partial Dependence Plotting</a>.  I won't cover the details here because they are covered in the linked post.</p>
+<p>The second thing I use in this phase is the treeinterpreter and waterfallcharts libraries.  This allows me to look at individual or groups of predictions and see the contributions of different features.  For more information see <a href="https://github.com/fastai/fastbook/blob/master/09_tabular.ipynb">Chapter 9 of the fastai book</a></p>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="Isaac-Flath/fastblog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/fastblog/tabular/2020/12/30/TabularModeling.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/fastblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/fastblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/fastblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>A personal blog of technical topics relating the machine learning</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://twitter.com/isaac_flath" title="isaac_flath"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
