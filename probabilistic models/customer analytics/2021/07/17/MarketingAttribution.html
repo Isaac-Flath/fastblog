@@ -381,8 +381,8 @@ window.onload = wrap_img;
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Here I have a simply dummy transition table.  For each action or state, we have the probability of what the next action is.  This is calculated from your existing marketing data and is effectively a model of your marketing communication actions.  From each action I can predict te chance of other actions occurring after that.  This also means that I can see how they interact as I can see the different paths and probabilities to all those paths.</p>
-<p>You will notice that Sale and Inactivated don't lead to anything else.  Once a sale is made the goal is met.  In some businesses it makes sense to cut it off here, and in others it makes sense to allow for longer chains where "completing" the chain is multiple buys in succession.  For simplicity and the sake of high level learning I will assume the goal is a single sale.</p>
-<p>Inactivated can mean many things to businesses.  It could mean you failed to sell, or failed to upgrade the customer, it could mean that the customer asked you to not contact them in any way in the future.  Regardless, the goal of a sale failed (usually in the scope of a campaign).</p>
+<p>You will notice that Sale and NotSale don't lead to anything else.  Once a sale is made the goal is met.  In some businesses it makes sense to cut it off here, and in others it makes sense to allow for longer chains where "completing" the chain is multiple buys in succession.  For simplicity and the sake of high level learning I will assume the goal is a single sale.</p>
+<p>NotSale can mean many things to businesses.  It could mean you failed to sell, or failed to upgrade the customer, it could mean that the customer asked you to not contact them in any way in the future.  Regardless, the goal of a sale failed (usually in the scope of a campaign).</p>
 
 </div>
 </div>
@@ -420,7 +420,7 @@ window.onload = wrap_img;
       <th>Email</th>
       <th>Popup</th>
       <th>Sale</th>
-      <th>Inactivated</th>
+      <th>NotSale</th>
     </tr>
   </thead>
   <tbody>
@@ -457,7 +457,7 @@ window.onload = wrap_img;
       <td>0.00</td>
     </tr>
     <tr>
-      <th>Inactivated</th>
+      <th>NotSale</th>
       <td>0.00</td>
       <td>0.00</td>
       <td>0.00</td>
@@ -500,10 +500,10 @@ window.onload = wrap_img;
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{'total_revenue': 210994.18,
- 'Popup': 0.4453614029176717,
- 'Email': 0.17378620978863699,
- 'Phone': 0.3808523872936914}</pre>
+<pre>{'total_revenue': 228135.55,
+ 'Popup': 0.5060799842334842,
+ 'Email': 0.17580872663283006,
+ 'Phone': 0.3181112891336858}</pre>
 </div>
 
 </div>
