@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Introduction to Attribution | Isaac’s Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Introduction to Attribution" />
+<meta name="author" content="Isaac Flath" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Last Touch, Multi Touch, and Markov Chain Attribution Introduction" />
+<meta property="og:description" content="Last Touch, Multi Touch, and Markov Chain Attribution Introduction" />
+<link rel="canonical" href="https://isaac-flath.github.io/fastblog/probabilistic%20models/customer%20analytics/2021/07/17/MarketingAttribution.html" />
+<meta property="og:url" content="https://isaac-flath.github.io/fastblog/probabilistic%20models/customer%20analytics/2021/07/17/MarketingAttribution.html" />
+<meta property="og:site_name" content="Isaac’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-07-17T00:00:00-05:00" />
+<script type="application/ld+json">
+{"url":"https://isaac-flath.github.io/fastblog/probabilistic%20models/customer%20analytics/2021/07/17/MarketingAttribution.html","@type":"BlogPosting","headline":"Introduction to Attribution","dateModified":"2021-07-17T00:00:00-05:00","datePublished":"2021-07-17T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://isaac-flath.github.io/fastblog/probabilistic%20models/customer%20analytics/2021/07/17/MarketingAttribution.html"},"author":{"@type":"Person","name":"Isaac Flath"},"description":"Last Touch, Multi Touch, and Markov Chain Attribution Introduction","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/fastblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://isaac-flath.github.io/fastblog/feed.xml" title="Isaac's Blog" /><link rel="shortcut icon" type="image/x-icon" href="/fastblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/fastblog/">Isaac&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/fastblog/about/">About Me</a><a class="page-link" href="/fastblog/search/">Search</a><a class="page-link" href="/fastblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Introduction to Attribution</h1><p class="page-description">Last Touch, Multi Touch, and Markov Chain Attribution Introduction</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-07-17T00:00:00-05:00" itemprop="datePublished">
+        Jul 17, 2021
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Isaac Flath</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      13 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Probabilistic Models">Probabilistic Models</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/fastblog/categories/#Customer Analytics">Customer Analytics</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/Isaac-Flath/fastblog/tree/master/_notebooks/2021-07-17-MarketingAttribution.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/fastblog/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/Isaac-Flath/fastblog/master?filepath=_notebooks%2F2021-07-17-MarketingAttribution.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/Isaac-Flath/fastblog/blob/master/_notebooks/2021-07-17-MarketingAttribution.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/fastblog/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#What-is-Attribution?">What is Attribution? </a></li>
+<li class="toc-entry toc-h1"><a href="#Purpose-of-this-post">Purpose of this post </a></li>
+<li class="toc-entry toc-h1"><a href="#Last-Touch-Attribution">Last-Touch Attribution </a></li>
+<li class="toc-entry toc-h1"><a href="#Multi-Touch-Attribution">Multi-Touch Attribution </a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#No-Decay">No-Decay </a></li>
+<li class="toc-entry toc-h2"><a href="#Position-Decay-and-Time-Day">Position-Decay and Time-Day </a></li>
+<li class="toc-entry toc-h2"><a href="#U-Shaped">U-Shaped </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Markov-Models">Markov Models </a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#Transition-Table">Transition Table </a></li>
+<li class="toc-entry toc-h2"><a href="#Removal-Effect">Removal Effect </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Gotchas-to-consider">Gotchas to consider </a></li>
+<li class="toc-entry toc-h1"><a href="#Conclusion">Conclusion </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2021-07-17-MarketingAttribution.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="What-is-Attribution?">
+<a class="anchor" href="#What-is-Attribution?" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is Attribution?<a class="anchor-link" href="#What-is-Attribution?"> </a>
+</h1>
+<p>Attribution is all about attributing a cause to a result.  In this post I will discuss it at a high level in the context of seeking a conversion or sale.  So what does that mean and why does that matter exactly?</p>
+<p>In a company you have many different ways you can influence customers or potential customers.  A few examples:</p>
+<ol>
+<li>Phone Call</li>
+<li>Email with picture A</li>
+<li>Email with picture B</li>
+<li>Send a Coupon</li>
+</ol>
+<p>Now imagine you just made a sale and you had sent a coupon, called, and sent an email to that customer in the last 6 months.  Which one was responsible for the sale?  Was it just one responsible, or was the combination of mediums important?  How do I know if the phone call was "worth it"?  What about the coupon?  Should I replicate this combination or are there better combinations?</p>
+<p>The answers to all of this require great data about what the causes are (action) that led to the effect (sale).  This is what attribution is all about.</p>
+<p>If you wonder whether you should be using attribution in your efforts just ask yourself the following questions.</p>
+<blockquote>
+<p>Do you want to know what activities you have done led to sales?  Do you want to know whether a campaign you launched was worth it?  Do you want to know what marketing you do is effective?</p>
+</blockquote>
+<p>If the answer is yes to either of those, you should get comfy with a few different attribution models.</p>
+<h1 id="Purpose-of-this-post">
+<a class="anchor" href="#Purpose-of-this-post" aria-hidden="true"><span class="octicon octicon-link"></span></a>Purpose of this post<a class="anchor-link" href="#Purpose-of-this-post"> </a>
+</h1>
+<p>Now that we understand the problem and it's importance, let me be specific about what I hope to accomplish in this post.</p>
+<ul>
+<li>
+<strong>Primary Goal:</strong> Communicate a high level understanding of several basic approach to attribution, how they work, what they are good at, what they are not so good at.</li>
+<li>
+<strong>Secondary Goal:</strong>  Expand on the questions in the "What is Attribution?" section and give some ideas for how this data can actually be used and why it is so powerful once you have it.</li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Last-Touch-Attribution">
+<a class="anchor" href="#Last-Touch-Attribution" aria-hidden="true"><span class="octicon octicon-link"></span></a>Last-Touch Attribution<a class="anchor-link" href="#Last-Touch-Attribution"> </a>
+</h1>
+<p>Let's start with the simplest attribution model, Last-Touch Attribution.</p>
+<p><strong>What is last-touch attribution?</strong></p>
+<p>This is just what it sounds like - you attribute the sale to the last touch.  Last-Touch Attribution would say whatever the most recent activity was before the sale was 100% responsible for that sale.</p>
+<p><strong>Example Interaction</strong></p>
+<p>For Last-Touch let's consider a scenario where we are selling pens and pencils.  We send a bunch of ads to see what sticks and attribute it like this (all to the last-touch).</p>
+<p><img src="/fastblog/images/copied_from_nb/./my_icons/Attribution_LastTouch.png" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Why would you use last-touch attribution</strong>?</p>
+<p>Because last-touch gives sole weight to the last interaction, it can be very helpful in products or companies where customers do not think about the purchase for extended periods of time.  For example if you are selling cheap pens and pencils, a customer probably didn't start thinking about the purchase over the course of multiple interactions and work up to the decision to buy.  They probably simply knew they were going to need some soon or were running low, and they saw an ad at the right time with the right message and clicked to buy.  In that scenario, last-touch could be very appropriate.</p>
+<p><strong>Why would you avoid last-touch attribution</strong>?</p>
+<p>If we consider the context of our example, it's clear that it's not appropriate for inter-related advertising channels or actions.  In our example, they only opened the email because they were thinking about the product.  They only got to the popup because they opened the email and clicked through.  In this type of scenario, it isn't accurate to say the final action gets all the credit.  In many luxury products, last-touch is not ideal.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>There is a similar strategy called "First-Touch" attribution which does this same idea but weights the first touch exclusively instead of the last touch.
+</div>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Multi-Touch-Attribution">
+<a class="anchor" href="#Multi-Touch-Attribution" aria-hidden="true"><span class="octicon octicon-link"></span></a>Multi-Touch Attribution<a class="anchor-link" href="#Multi-Touch-Attribution"> </a>
+</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>While the last-touch attribution is appropriate in some situations, it has some obvious flaws that can make it very inaccurate in some industries.  Here's a personal example of why last-touch may not be appropriate.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Multi-touch Attribution was created to solve the problem of interactions over time.  Last-Touch Attribution assumed the most recent action was solely responsible, but in reality there could be many attributing factors.  We will cover four types - no-decay, time-decay, position-decay, and U-shaped.</p>
+<blockquote>
+<p>Note "no-decay" is often called linear.  I try to avoid that term as it can be confusing when business and technical teams come together since both time-decay and position-decay can decay at a linear rate.</p>
+</blockquote>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="No-Decay">
+<a class="anchor" href="#No-Decay" aria-hidden="true"><span class="octicon octicon-link"></span></a>No-Decay<a class="anchor-link" href="#No-Decay"> </a>
+</h2>
+<p><strong>What is no-decay attribution?</strong></p>
+<p>No-decay attribution gives every interaction equal weight.  This would say if you sent 4 advertisements to the customer, they are each 25% responsible for the sale.</p>
+<p><strong>Example Interaction</strong></p>
+<p>My dad just planned a trip to Joshua Tree.  He visited long ago and has been getting regular email, letters, and voice mails updating him on new events to encourage him to return.  For months he didn't open or respond to a single one, but it did get him thinking about how much he enjoyed it and would like to go back.  Eventually he opened an email and did some research to plan his trip and is going next month</p>
+<p><img src="/fastblog/images/copied_from_nb/./my_icons/Attribution_NoDecay.png" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Why would you use no-decay attribution</strong>?</p>
+<p>No-decay attribution can be in scenarios where any given interaction could trigger a sale, you just need it to land at the right time  and different people continue to think through.  If the customer doesn't say no, then they may later say yes.  In some scenarios which they say "yes" to isn't consistent so you can equally weight them all.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Position-Decay-and-Time-Day">
+<a class="anchor" href="#Position-Decay-and-Time-Day" aria-hidden="true"><span class="octicon octicon-link"></span></a>Position-Decay and Time-Day<a class="anchor-link" href="#Position-Decay-and-Time-Day"> </a>
+</h2>
+<p><strong>What is position-decay and time-decay attribution?</strong></p>
+<p>Position-decay and weight-decay are both means of putting more attribution to recent actions and less on older action.</p>
+<p>Position-decay does not care about time (ie days), but does care about how many actions ago.  For example the most recent email, the 2nd most recent email, the 3rd most recent email, etc.  Maybe all of those happened in the last 2 weeks or maybe they were spread out over 2 months, position-decay only sees how many positions it is removed from the sale.</p>
+<p>Time-decay is very similar to position-decay but instead instead of decaying based on number of actions, attribution decays based on time (ie days) from the sale.</p>
+<p><strong>Example Interaction</strong></p>
+<p>Imagine you want to get a new couch (or your spouse wants you to get a new couch).  It's not really a priority or very urgent You do a quick amazon search but don't buy in the moment and plan to come back to it later to figure out what to buy and who from.  It's not particularly important because you already have one and while it would be nice to have a nicer one, it really isn't a big deal.  This could go on for years, but with the right messaging this person could be motivated to buy.</p>
+<p><img src="/fastblog/images/copied_from_nb/./my_icons/Attribution_TimeDecay.png" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Why would you use position-decay or time-decay attribution</strong>?</p>
+<p>You may get various advertisements about it before you eventually take the time to place the purchase.  While each does have importance to help remind you to make the purchase - the one that triggers you to buy is most important because it hit at the time with the message to motivate you to actually take action.  Maybe the messaging was better, maybe the time it was sent was better, but for whatever reason it was better.  The older messages did have an impact because it kept it at the forefront of your mind, but the older it was the clearer it is that it did not trigger a purchase.  The final final action is what triggered the buy and you feel it deserves the most credit.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="U-Shaped">
+<a class="anchor" href="#U-Shaped" aria-hidden="true"><span class="octicon octicon-link"></span></a>U-Shaped<a class="anchor-link" href="#U-Shaped"> </a>
+</h2>
+<p><strong>What is u-shaped attribution?</strong></p>
+<p>A u-shaped attribution weighs the first and last touches most heavily, with lighter weights on the middle interactions.</p>
+<p><strong>Example Interaction</strong></p>
+<p>To re-use the example from before, My dad just planned a trip to Joshua Tree.  He visited long ago and has been getting regular email, letters, and voice mails updating him on new events to encourage him to return.  For months he didn't open or respond to a single one, but it did get him thinking about how much he enjoyed it and would like to go back.  Eventually he opened an email and did some research to plan his trip and is going next month</p>
+<p><img src="/fastblog/images/copied_from_nb/./my_icons/Attribution_UShaped.png" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Why would you use u-shaped attribution</strong>?</p>
+<p>In this case you could argue that the initial outreach that got him thinking about going on the trip was was very important.  The final communication that got him to purchase was also important.  The stuff that happened in the middle mattered but wasn't as critical and wasn't even looked at.  Because of this both the first and last touch are given heavy attribution while the middle stuff is given less.</p>
+<p>In some luxury products this can be a great attribution methodology.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Markov-Models">
+<a class="anchor" href="#Markov-Models" aria-hidden="true"><span class="octicon octicon-link"></span></a>Markov Models<a class="anchor-link" href="#Markov-Models"> </a>
+</h1>
+<p>Markov models are a bit more involved.  The steps are:</p>
+<ol>
+<li>Calculate probabilities to create a transition matrix</li>
+<li>Calculate Removal Effect to determine attribution
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>Rather than attributing on a record by record level, attribution normally happens in groups on an action or channel level.  In marketing contexts these are often referred to as campaigns where you can attribute sales to different channels within a campaign.
+</div>
+</li>
+</ol>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Transition-Table">
+<a class="anchor" href="#Transition-Table" aria-hidden="true"><span class="octicon octicon-link"></span></a>Transition Table<a class="anchor-link" href="#Transition-Table"> </a>
+</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The transition table stores probabilities for all transitions.  If I send an email, what's the probability that a phone call is next?  What's the probability that a popup is next?  What's the probability that a sale is next?  All combinations are stored in a transition table.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>This data is also sometimes represented as a graph with nodes being actions and edges being probabilities.
+</div>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here I have a simply dummy transition table.  For each action or state, we have the probability of what the next action is.  This is calculated from your existing marketing data and is effectively a model of your marketing communication actions.  From each action I can predict te chance of other actions occurring after that.  This also means that I can see how they interact as I can see the different paths and probabilities to all those paths.</p>
+<p>You will notice that Sale and Inactivated don't lead to anything else.  Once a sale is made the goal is met.  In some businesses it makes sense to cut it off here, and in others it makes sense to allow for longer chains where "completing" the chain is multiple buys in succession.  For simplicity and the sake of high level learning I will assume the goal is a single sale.</p>
+<p>Inactivated can mean many things to businesses.  It could mean you failed to sell, or failed to upgrade the customer, it could mean that the customer asked you to not contact them in any way in the future.  Regardless, the goal of a sale failed (usually in the scope of a campaign).</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Phone</th>
+      <th>Email</th>
+      <th>Popup</th>
+      <th>Sale</th>
+      <th>Inactivated</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Phone</th>
+      <td>0.20</td>
+      <td>0.30</td>
+      <td>0.35</td>
+      <td>0.05</td>
+      <td>0.10</td>
+    </tr>
+    <tr>
+      <th>Email</th>
+      <td>0.20</td>
+      <td>0.34</td>
+      <td>0.25</td>
+      <td>0.10</td>
+      <td>0.11</td>
+    </tr>
+    <tr>
+      <th>Popup</th>
+      <td>0.22</td>
+      <td>0.31</td>
+      <td>0.30</td>
+      <td>0.08</td>
+      <td>0.09</td>
+    </tr>
+    <tr>
+      <th>Sale</th>
+      <td>1.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>Inactivated</th>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Removal-Effect">
+<a class="anchor" href="#Removal-Effect" aria-hidden="true"><span class="octicon octicon-link"></span></a>Removal Effect<a class="anchor-link" href="#Removal-Effect"> </a>
+</h2>
+<p>Now that we have all the probabilities of all the interactions we can measure what the sale rate is for any given chain.  We can also use those probabilities to run simulations.  We can then run those simulations without 1 action and see how it effects the sale rate.  The difference in that is the removal weight.  By calculating this removal weight for each action, we can determine the amount to attribute to a particular action or channel.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{'total_revenue': 210994.18,
+ 'Popup': 0.4453614029176717,
+ 'Email': 0.17378620978863699,
+ 'Phone': 0.3808523872936914}</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Gotchas-to-consider">
+<a class="anchor" href="#Gotchas-to-consider" aria-hidden="true"><span class="octicon octicon-link"></span></a>Gotchas to consider<a class="anchor-link" href="#Gotchas-to-consider"> </a>
+</h1>
+<p>In any attribution approach there are some things to consider.  The goal of this section isn't to scare you off, but just to ensure you realize that you can't just take one of these and implement it without further thought.  Each of these areas would require further research and thought as you seek to implement an attribution model in your organization.</p>
+<ul>
+<li>Just because you sent an email and the customer clicked through and bought doesn't mean they wouldn't have bought without that email.  Some of those customers would have bought anyway so really your marketing effort did nothing, but may still get credit for the sale.  This can skew your ROI calculations.</li>
+<li>You may not be able to track all touch points.  Any interaction the customer has you want to be able to track - so spend time thinking about what all the possible touch points are and how reliably you can track each of them.  There may be some you can't track - but you need to be aware of those and not just ignore them.</li>
+<li>Digital tracking to understand those touch points can be extremely difficult, especially as people have more and more devices they use (phone, tablet, work computer, personal computer, etc.).  People may look up a product on their computer, go visit a store, and then look up reviews on their phone before buying.  Tying all those together can be challenging, but helps to get the whole picture.</li>
+<li>Not all customers are equal.  Different customers respond to different channels in different ways.  Some customers are expensive to sell to others are relatively easy.  Segmenting revenue reports by channel and by other customer segments is important so that you have a plan for all your customers and not just planning for the average.</li>
+<li>For every <em>hypothesis</em> on how customers behave and how you should attribute, you should be trying to verify that as best you can with data.  Can you see any patterns in who buys and who does not that supports your theory?</li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Conclusion">
+<a class="anchor" href="#Conclusion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusion<a class="anchor-link" href="#Conclusion"> </a>
+</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>I hope you learned a bit about marketing attribution.  These are the basics and are a great starting point.  Proper attribution is important because once you can properly attribute the causes of sales you can calculate ROI.  When you can calculate ROI you can make data driven decisions about effectiveness of experiments campaigns and initiatives.  The better you can measure success the faster you can experiment with marketing initiatives and the more confident you can be in the results you are seeing.  Marketing is not a discipline where anyone has the "right" answer and can jump in and have every campaign land perfectly.  It's all about setting things up so as you try things you learn as much as possible from what worked and what didn't so your next marketing effort is more informed and has an increased chance of success.</p>
+<p>Two other critical things I hope you got from this:</p>
+<ul>
+<li>The core concepts are something that anyone can understand, even if you don't understand any of the code.</li>
+<li>Why you would use one attribution methodology vs another is as much a business question as it is a technical question, so these decisions should be made through collaboration of the 2 teams.</li>
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="Isaac-Flath/fastblog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/fastblog/probabilistic%20models/customer%20analytics/2021/07/17/MarketingAttribution.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/fastblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/fastblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/fastblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>A personal blog of technical topics relating the machine learning</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://twitter.com/isaac_flath" title="isaac_flath"><svg class="svg-icon grey"><use xlink:href="/fastblog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
